@@ -1,0 +1,7 @@
+################### O365beat Configuration Example #########################
+
+############################# O365beat ######################################
+
+o365beat:
+  # Defines how often an event is sent to the output
+  period: 1s

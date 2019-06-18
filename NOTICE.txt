@@ -1,0 +1,5 @@
+o365beat
+Copyright 2019 Chris Hendricks
+
+This product includes software developed by The Apache Software
+Foundation (http://www.apache.org/).
