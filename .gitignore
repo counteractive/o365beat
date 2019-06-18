@@ -1,5 +1,8 @@
 /.idea
 /build
+/.vscode
+/data
+/vendor
 
 .DS_Store
 /o365beat
