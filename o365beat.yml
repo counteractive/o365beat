@@ -5,6 +5,17 @@
 o365beat:
   # Defines how often an event is sent to the output
   period: 1s
+  tenant_domain: 'TODO.onmicrosoft.com'
+  client_secret: GENERATED_IN_AZURE_APP_API_CONSOLE
+  client_id: GUID # aka application id
+  directory_id: GUID # aka tenant id
+  login_url: https://login.microsoftonline.com/
+  resource_url: https://manage.office.com/
+  log_types:
+    - Audit.AzureActiveDirectory
+    - Audit.Exchange
+    - Audit.SharePoint
+    - Audit.General
 
 #================================ General =====================================
 

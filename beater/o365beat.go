@@ -13,8 +13,8 @@ import (
 
 // O365beat configuration.
 type O365beat struct {
-	done   chan struct{}
-	config config.Config
+	done   chan struct{} // channel to initiate shutdown of main event loop
+	config config.Config // configuration settings
 	client beat.Client
 }
 
