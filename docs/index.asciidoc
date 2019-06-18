@@ -1,0 +1,5 @@
+= O365beat Docs
+
+Welcome to the O365beat documentation.
+
+

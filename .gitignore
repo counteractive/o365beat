@@ -1,0 +1,7 @@
+/.idea
+/build
+
+.DS_Store
+/o365beat
+/o365beat.test
+*.pyc
