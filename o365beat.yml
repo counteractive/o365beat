@@ -3,19 +3,26 @@
 ############################# O365beat ######################################
 
 o365beat:
-  # Defines how often an event is sent to the output
-  period: 1s
-  tenant_domain: 'TODO.onmicrosoft.com'
-  client_secret: GENERATED_IN_AZURE_APP_API_CONSOLE
-  client_id: GUID # aka application id
-  directory_id: GUID # aka tenant id
-  login_url: https://login.microsoftonline.com/
-  resource_url: https://manage.office.com/
-  log_types:
+  # Defines how often API is polled for new content blobs (5 min default),
+  # as new content probably isn't published that often.
+  period: 30s # for testing
+
+  # prefer to pull secrets from environment (e.g, > set -a; . ./ENV_FILE; set +a;)
+  # but can be hard-coded here:
+  tenant_domain: ${O365BEAT_TENANT_DOMAIN}
+  client_secret: ${O365BEAT_CLIENT_SECRET}
+  client_id:     ${O365BEAT_CLIENT_ID}     # aka application id (GUID)
+  directory_id:  ${O365BEAT_DIRECTORY_ID}  # aka tenant id (GUID)
+
+  # the following are specified in the API documentation
+  # should not need to change them unless that changes
+  # login_url:    https://login.microsoftonline.com/
+  # resource_url: https://manage.office.com/
+  content_types:
     - Audit.AzureActiveDirectory
-    - Audit.Exchange
-    - Audit.SharePoint
-    - Audit.General
+    # - Audit.Exchange
+    # - Audit.SharePoint
+    # - Audit.General
 
 #================================ General =====================================
 
