@@ -13,7 +13,7 @@ o365beat:
   client_secret: ${O365BEAT_CLIENT_SECRET}
   client_id:     ${O365BEAT_CLIENT_ID}     # aka application id (GUID)
   directory_id:  ${O365BEAT_DIRECTORY_ID}  # aka tenant id (GUID)
-  # registry_file_path: ./o365beat-registry.json
+  registry_file_path: ./tmp/o365beat-registry.json
 
   # the following are specified in the API documentation
   # should not need to change them unless that changes
@@ -21,9 +21,9 @@ o365beat:
   # resource_url: https://manage.office.com/
   content_types:
     - Audit.AzureActiveDirectory
-    # - Audit.Exchange
-    # - Audit.SharePoint
-    # - Audit.General
+    - Audit.Exchange
+    - Audit.SharePoint
+    - Audit.General
 
 #================================ General =====================================
 
@@ -113,8 +113,13 @@ setup.kibana:
   #ssl.key: "/etc/pki/client/cert.key"
 
 #----------------------------- Console output ---------------------------------
-output.console:
-  pretty: false
+# output.console:
+  # pretty: false
+
+#------------------------------- File output ----------------------------------
+output.file:
+  path: "./tmp/"
+  filename: o356beat.json
 
 #================================ Processors =====================================
 
