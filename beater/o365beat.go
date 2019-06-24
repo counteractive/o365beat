@@ -3,6 +3,7 @@ package beater
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -33,9 +34,6 @@ func (a *authInfo) header() string {
 }
 
 func (a *authInfo) expired() bool {
-	// if a == nil {
-	// 	return true
-	// }
 	const expirationBuffer = 60 // extra seconds unexpired token is considered expired
 	expiration, _ := strconv.ParseInt(a.ExpiresOn, 10, 64)
 	return time.Now().Unix() > (expiration - expirationBuffer)
@@ -78,11 +76,10 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 	return bt, nil
 }
 
-func (bt *O365beat) authenticatedRequest(
+// apiRequest issues an http request with api authorization header
+func (bt *O365beat) apiRequest(
 	method, urlStr string, body, query, headers map[string]string,
 ) (*http.Response, error) {
-	logp.Debug("http", "building request with method %v, url %v, body %v, query %v, and headers %v",
-		method, urlStr, body, query, headers)
 	reqBody := url.Values{}
 	for k, v := range body {
 		reqBody.Set(k, v)
@@ -120,7 +117,7 @@ func (bt *O365beat) authenticatedRequest(
 }
 
 func (bt *O365beat) authenticate() error {
-	// does not use request helper to allow clean use of this func therein
+	// does not use apiRequest helper to allow clean use of this func therein
 	logp.Info("authenticating via: %s", bt.authURL)
 	reqBody := url.Values{}
 	reqBody.Set("grant_type", "client_credentials")
@@ -131,13 +128,11 @@ func (bt *O365beat) authenticate() error {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	logp.Debug("auth", "sending auth req: %v", req)
 	res, err := bt.httpClient.Do(req)
-	logp.Debug("auth", "sent auth req, got res: %v and err: %v", res, err)
 	if err != nil {
 		return err
 	} else if res.StatusCode != 200 {
 		return fmt.Errorf("non-200 status code during auth (see below).\n\treq: %v\n\tres:\n\t%v", req, res)
 	}
-	logp.Debug("auth", "handled errors")
 	defer res.Body.Close()
 	var ai authInfo
 	json.NewDecoder(res.Body).Decode(&ai)
@@ -151,7 +146,7 @@ func (bt *O365beat) authenticate() error {
 func (bt *O365beat) listSubscriptions() ([]map[string]string, error) {
 	logp.Info("getting subscriptions from: %s", bt.apiRootURL+"subscriptions/list")
 	query := map[string]string{"PublisherIdentifier": bt.config.DirectoryID}
-	res, err := bt.authenticatedRequest("GET", bt.apiRootURL+"subscriptions/list", nil, query, nil)
+	res, err := bt.apiRequest("GET", bt.apiRootURL+"subscriptions/list", nil, query, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +166,7 @@ func (bt *O365beat) subscribe(contentType string) (common.MapStr, error) {
 		"contentType":         contentType,
 		"PublisherIdentifier": bt.config.DirectoryID,
 	}
-	res, err := bt.authenticatedRequest("POST", bt.apiRootURL+"subscriptions/start", nil, query, nil)
+	res, err := bt.apiRequest("POST", bt.apiRootURL+"subscriptions/start", nil, query, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +178,7 @@ func (bt *O365beat) subscribe(contentType string) (common.MapStr, error) {
 	return sub, nil
 }
 
-const maxAgeMinutes = (7 * 24 * 60) // TODO determine if a buffer is required (doesn't seem to be)
+const maxAgeMinutes = (7 * 24 * 60)
 
 // listAvailableContent gets blob locations for a single content type over a span <=24 hours
 // (the basic primitive provided by the API)
@@ -208,19 +203,19 @@ func (bt *O365beat) listAvailableContent(
 		return nil, fmt.Errorf("end time cannot be before start time")
 	}
 
-	dateFmt := "2006-01-02T15:04:05" // API needs UTC in this format
+	dateFmt := "2006-01-02T15:04:05" // API needs UTC in this format (no "Z" suffix)
 	query := map[string]string{
 		"contentType":         contentType,
 		"startTime":           start.UTC().Format(dateFmt),
 		"endTime":             end.UTC().Format(dateFmt),
 		"PublisherIdentifier": bt.config.DirectoryID,
 	}
-	res, err := bt.authenticatedRequest("GET", bt.apiRootURL+"subscriptions/content", nil, query, nil)
+	res, err := bt.apiRequest("GET", bt.apiRootURL+"subscriptions/content", nil, query, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	var locs []map[string]string // api returns a json array all string:string
+	var locs []map[string]string
 	json.NewDecoder(res.Body).Decode(&locs)
 	res.Body.Close()
 	contentList := locs
@@ -228,7 +223,7 @@ func (bt *O365beat) listAvailableContent(
 	for res.Header.Get("NextPageUri") != "" {
 		next := res.Header.Get("NextPageUri")
 		logp.Debug("api", "getting next page of results from NextPageUri: %v", next)
-		res, err = bt.authenticatedRequest("GET", next, nil, nil, nil) // don't redeclare res!
+		res, err = bt.apiRequest("GET", next, nil, nil, nil) // don't redeclare res!
 		if err != nil {
 			return nil, err
 		}
@@ -285,8 +280,8 @@ func (bt *O365beat) listAllAvailableContent(start, end time.Time) ([]map[string]
 }
 
 func (bt *O365beat) getContent(urlStr string) ([]common.MapStr, error) {
-	logp.Debug("STUB", "getting content from %v.", urlStr)
-	res, err := bt.authenticatedRequest("GET", urlStr, nil, nil, nil)
+	logp.Debug("api", "getting content from %v.", urlStr)
+	res, err := bt.apiRequest("GET", urlStr, nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -298,9 +293,10 @@ func (bt *O365beat) getContent(urlStr string) ([]common.MapStr, error) {
 
 // publish sends events into the beats pipeline
 func (bt *O365beat) publish(content []common.MapStr, b *beat.Beat) error {
-	logp.Debug("STUB", "publishing content")
+	logp.Debug("beat", "publishing %v event(s)", len(content))
 	for _, evt := range content {
 		ts, err := time.Parse(time.RFC3339, evt["CreationTime"].(string)+"Z")
+		// ts, err := time.Parse(time.RFC3339, evt["CreationTime"].(string))
 		if err != nil {
 			return err
 		}
@@ -311,17 +307,16 @@ func (bt *O365beat) publish(content []common.MapStr, b *beat.Beat) error {
 		fs["type"] = b.Info.Name
 		beatEvent := beat.Event{Timestamp: ts, Fields: fs}
 		bt.client.Publish(beatEvent)
-		logp.Info("Event sent")
 	}
 	return nil
 }
 
-func (bt *O365beat) poll(lastProcessed *time.Time, b *beat.Beat) error {
-	// TODO: update registry file rather than a pointer to in-memory state
+func (bt *O365beat) poll(lastProcessed time.Time, b *beat.Beat) error {
+	logp.Debug("poll", "polling since %v", lastProcessed)
 	// set start of span to earlier of last contentCreated or maxAgeMinutes (7 days)
 	now := time.Now()
 	start := now.Add(-maxAgeMinutes * time.Minute)
-	if start.Before(*lastProcessed) {
+	if start.Before(lastProcessed) {
 		start = lastProcessed.Add(time.Second) // API granularity is by the second
 	}
 
@@ -337,20 +332,53 @@ func (bt *O365beat) poll(lastProcessed *time.Time, b *beat.Beat) error {
 	// get the actual content and publish it
 	for _, v := range availableContent {
 		// TODO: consider doing this concurrently:
-		content, _ := bt.getContent(v["contentUri"]) // TODO: warn on error
-		err := bt.publish(content, b)
+		content, err := bt.getContent(v["contentUri"])
+		if err != nil {
+			logp.Warn("error getting content: %v, moving to next blob", err)
+			continue
+		}
+		err = bt.publish(content, b)
 		if err != nil {
 			return err
 		}
-		contentCreated, _ := time.Parse(time.RFC3339, v["contentCreated"]+"Z")
+		contentCreated, err := time.Parse(time.RFC3339, v["contentCreated"]) // why doesn't this need a Z?
 		if err != nil {
 			return err
 		}
+		logp.Debug("poll", "published with contentCreated of %v, lastProcessed is %v", contentCreated, lastProcessed)
 		if lastProcessed.Before(contentCreated) {
-			*lastProcessed = contentCreated
+			err := bt.putRegistry(contentCreated)
+			if err != nil {
+				return err
+			}
+			lastProcessed = contentCreated
 		}
 	}
+	return nil
+}
 
+func (bt *O365beat) getRegistry() (time.Time, error) {
+	logp.Debug("reg", "getting registry info from %v", bt.config.RegistryFilePath)
+	reg, err := ioutil.ReadFile(bt.config.RegistryFilePath)
+	if err != nil {
+		logp.Warn("error parsing registry file, may not exist.")
+		return time.Time{}, nil
+	}
+	lastProcessed, err := time.Parse(time.RFC3339, string(reg))
+	if err != nil {
+		logp.Warn("error parsing lastProcessed timestamp from registry file")
+		return lastProcessed, err
+	}
+	return lastProcessed, nil
+}
+
+func (bt *O365beat) putRegistry(lastProcessed time.Time) error {
+	logp.Debug("reg", "putting registry info (%v) to %v", lastProcessed, bt.config.RegistryFilePath)
+	ts := []byte(lastProcessed.Format(time.RFC3339))
+	err := ioutil.WriteFile(bt.config.RegistryFilePath, ts, 0644)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -363,15 +391,7 @@ func (bt *O365beat) Run(b *beat.Beat) error {
 	if err != nil {
 		return err
 	}
-
 	ticker := time.NewTicker(bt.config.Period)
-	// counter := 1
-
-	// // authenticate
-	// err = bt.authenticate()
-	// if err != nil {
-	// 	return err
-	// }
 
 	// enable all subscriptions
 	subscriptions, err := bt.listSubscriptions()
@@ -384,15 +404,19 @@ func (bt *O365beat) Run(b *beat.Beat) error {
 		}
 	}
 
-	// TODO: retrieve state.  track at least latest "contentCreated" for the processed blobs
-	//       storing a timestamp means that blob and all before have been published.
-	lastProcessed := &time.Time{} // TODO: pull from registry
-	// loop ticks only AFTER its period, if we want "initial tick"
-	// we have to do it in advance of the loop:
+	// registry (state) is just the most recent "contentCreated" for processed blobs
+	// storing a timestamp means that blob and all before have been published.
+	lastProcessed, err := bt.getRegistry()
+	if err != nil {
+		return err
+	}
+
+	// ticker's first tick is AFTER its period, do "initial tick" in advance:
 	err = bt.poll(lastProcessed, b)
 	if err != nil {
 		return err
 	}
+
 	// api polling loop:
 	for {
 		select {
@@ -400,21 +424,14 @@ func (bt *O365beat) Run(b *beat.Beat) error {
 			return nil
 		case <-ticker.C:
 		}
-
+		lastProcessed, err := bt.getRegistry()
+		if err != nil {
+			return err
+		}
 		bt.poll(lastProcessed, b)
 		if err != nil {
 			return err
 		}
-		// event := beat.Event{
-		// 	Timestamp: time.Now(),
-		// 	Fields: common.MapStr{
-		// 		"type":    b.Info.Name,
-		// 		"counter": counter,
-		// 	},
-		// }
-		// bt.client.Publish(event)
-		// logp.Info("Event sent")
-		// counter++
 	}
 }
 
