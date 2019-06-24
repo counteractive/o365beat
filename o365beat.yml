@@ -13,6 +13,7 @@ o365beat:
   client_secret: ${O365BEAT_CLIENT_SECRET}
   client_id:     ${O365BEAT_CLIENT_ID}     # aka application id (GUID)
   directory_id:  ${O365BEAT_DIRECTORY_ID}  # aka tenant id (GUID)
+  # registry_file_path: ./o365beat-registry.json
 
   # the following are specified in the API documentation
   # should not need to change them unless that changes
@@ -87,9 +88,9 @@ setup.kibana:
 # Configure what output to use when sending the data collected by the beat.
 
 #-------------------------- Elasticsearch output ------------------------------
-output.elasticsearch:
+# output.elasticsearch:
   # Array of hosts to connect to.
-  hosts: ["localhost:9200"]
+  # hosts: ["localhost:9200"]
 
   # Optional protocol and basic auth credentials.
   #protocol: "https"
@@ -110,6 +111,10 @@ output.elasticsearch:
 
   # Client Certificate Key
   #ssl.key: "/etc/pki/client/cert.key"
+
+#----------------------------- Console output ---------------------------------
+output.console:
+  pretty: false
 
 #================================ Processors =====================================
 
