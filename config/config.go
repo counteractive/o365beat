@@ -1,8 +1,6 @@
 // Config is put into a different package to prevent cyclic imports in case
 // it is needed in several locations
 
-// TODO: incorporate registry file for state maintenance.
-
 package config
 
 import "time"
@@ -16,12 +14,14 @@ type Config struct {
 	DirectoryID      string        `config:"directory_id"` // aka tenant id
 	ContentTypes     []string      `config:"content_types"`
 	RegistryFilePath string        `config:"registry_file_path"`
-	// LoginUrl     string        `config:"login_url"`
-	// ResourceUrl  string        `config:"resource_url"`
+	APITimeout       time.Duration `config:"api_timeout"`
+	ContentMaxAge    time.Duration `config:"content_max_age"`
 }
 
-// DefaultConfig sets defaults for configuration options
+// DefaultConfig sets defaults for configuration options (tune as necessary)
 var DefaultConfig = Config{
-	Period:           60 * 5 * time.Second, // TODO: tune this default, start at 5 min
+	Period:           60 * 5 * time.Second,
 	RegistryFilePath: "./o365beat-registry.json",
+	APITimeout:       30 * time.Second,
+	ContentMaxAge:    (7 * 24 * 60) * time.Minute,
 }
