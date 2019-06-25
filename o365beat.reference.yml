@@ -3,8 +3,26 @@
 ############################# O365beat ######################################
 
 o365beat:
-  # Defines how often an event is sent to the output
-  period: 1s
+  # period Defines how often API is polled for new content blobs
+  # 5 min default, as new content (probably) isn't published too often
+  # period: 5m
+
+  # pull secrets from environment (e.g, > set -a; . ./ENV_FILE; set +a;)
+  # or hard-coded here:
+  tenant_domain: ${O365BEAT_TENANT_DOMAIN:}
+  client_secret: ${O365BEAT_CLIENT_SECRET:}
+  client_id:     ${O365BEAT_CLIENT_ID:}     # aka application id (GUID)
+  directory_id:  ${O365BEAT_DIRECTORY_ID:}  # aka tenant id (GUID)
+  registry_file_path: ${O365BEAT_REGISTRY_PATH:./o365beat-registry.json}
+
+  # the following content types will be pulled from the API
+  # for available types, see https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference#working-with-the-office-365-management-activity-api
+  content_types:
+    - Audit.AzureActiveDirectory
+    - Audit.Exchange
+    - Audit.SharePoint
+    - Audit.General
+    # - DLP.All # TODO: figure out what to do with this, it's not like the rest
 
 #================================ General ======================================
 
