@@ -332,7 +332,7 @@ func (bt *O365beat) publish(content []common.MapStr, b *beat.Beat) error {
 		for k, v := range evt {
 			fs[k] = v
 		}
-		fs["type"] = b.Info.Name
+		fs["type"] = b.Info.Name //TODO: fix this ... it isn't right, it's showing x24. Check the old demo.
 		beatEvent := beat.Event{Timestamp: ts, Fields: fs}
 		bt.client.Publish(beatEvent)
 	}
@@ -351,10 +351,9 @@ func (bt *O365beat) poll(lastProcessed time.Time, b *beat.Beat) error {
 	// get all available content locations (sorted by contentCreated):
 	availableContent, err := bt.listAllAvailableContent(start, now)
 	if err != nil {
-		logp.Warn(
-			"error listing all available content between %v and %v (continuing):\n\t%v",
-			start, now, err,
-		)
+		err = fmt.Errorf("error listing all available content between %v and %v: %v", start, now, err)
+		logp.Error(err)
+		return err
 	}
 
 	// get the actual content and publish it (concurrently someday?)
@@ -375,12 +374,6 @@ func (bt *O365beat) poll(lastProcessed time.Time, b *beat.Beat) error {
 			return err
 		}
 		logp.Debug("beat", "published blob created %v, last was %v, updating registry", contentCreated, lastProcessed)
-		// this check is redundant:
-		// if contentCreated.Before(lastProcessed) {
-		// 	err := fmt.Errorf("available content not sorted; some content may not have been published")
-		// 	logp.Error(err)
-		// 	return err
-		// }
 		err = bt.putRegistry(contentCreated)
 		if err != nil {
 			logp.Error(err)

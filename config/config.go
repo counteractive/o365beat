@@ -21,7 +21,7 @@ type Config struct {
 // DefaultConfig sets defaults for configuration options (tune as necessary)
 var DefaultConfig = Config{
 	Period:           60 * 5 * time.Second,
-	RegistryFilePath: "./o365beat-registry.json",
+	RegistryFilePath: "./o365beat.registry.txt",
 	APITimeout:       30 * time.Second,
 	ContentMaxAge:    (7 * 24 * 60) * time.Minute,
 }
