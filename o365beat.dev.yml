@@ -17,11 +17,30 @@ o365beat:
 
   content_types:
     - Audit.AzureActiveDirectory
-    - Audit.Exchange
-    - Audit.SharePoint
-    - Audit.General
+    # - Audit.Exchange
+    # - Audit.SharePoint
+    # - Audit.General
     # - DLP.All
 
-output.file:
-  path: "./tmp/"
-  filename: o365beat.json
+# output.console:
+#   pretty: true
+
+# output.file:
+#   path: "./tmp/"
+#   filename: o365beat.json
+
+output.logstash:
+  hosts:
+    - ${O365BEAT_LOGSTASH_HOST}
+  ssl:
+    certificate_authorities:
+      - ${O365BEAT_CLIENT_CA_KEY_PATH}
+    certificate: ${O365BEAT_CLIENT_CER_PATH}
+    key: ${O365BEAT_CLIENT_KEY_PATH}
+
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/certutil.html
+# https://www.elastic.co/blog/elasticsearch-security-configure-tls-ssl-pki-authentication
+# split the p12 into the sub-chunks needed for the conf (private key, public cert, ca cert)
+# > openssl pkcs12 -in client.p12 -nocerts -nodes > client.key # Private Key
+# > openssl pkcs12 -in client.p12 -clcerts -nokeys  > client.cer # Public Certificate
+# > openssl pkcs12 -in client.p12 -cacerts -nokeys -chain > client-ca.cer # CA Certificate

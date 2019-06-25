@@ -1,5 +1,5 @@
 BEAT_NAME=o365beat
-BEAT_PATH=github.com/counteractive/o365beat
+BEAT_PATH=github.crm om/counteractive/o365beat
 BEAT_GOPATH=$(firstword $(subst :, ,${GOPATH}))
 SYSTEM_TESTS=false
 TEST_ENVIRONMENT=false
@@ -15,9 +15,9 @@ NO_COLLECT=true
 
 # Initial beat setup
 .PHONY: setup
-setup: pre-setup git-add
+setup: pre-setup # git-add
 
-pre-setup: copy-vendor git-init
+pre-setup: copy-vendor # git-init
 	$(MAKE) -f $(LIBBEAT_MAKEFILE) mage ES_BEATS=$(ES_BEATS)
 	$(MAKE) -f $(LIBBEAT_MAKEFILE) update BEAT_NAME=$(BEAT_NAME) ES_BEATS=$(ES_BEATS) NO_COLLECT=$(NO_COLLECT)
 
@@ -30,11 +30,11 @@ copy-vendor:
 	mkdir -p vendor/github.com/magefile
 	cp -R ${BEAT_GOPATH}/src/github.com/elastic/beats/vendor/github.com/magefile/mage vendor/github.com/magefile
 
-.PHONY: git-init
-git-init:
-	git init
+# .PHONY: git-init
+# git-init:
+# 	git init
 
-.PHONY: git-add
-git-add:
-	git add -A
-	git commit -m "Add generated o365beat files"
+# .PHONY: git-add
+# git-add:
+# 	git add -A
+# 	git commit -m "Add generated o365beat files"
