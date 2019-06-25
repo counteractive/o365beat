@@ -1,9 +1,76 @@
+# Common Schema transcribed (roughly) from:
+# https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema
+# NOTE: apparently does not affect elasticsearch mappings, still need template(s)?
+# TODO: consider expanding beyond Common Schema, if this is actually useful.
+
 - key: o365beat
   title: o365beat
-  description:
+  description: These are the fields used by o365beat
   fields:
-    - name: counter
-      type: long
+    - name: Id
+      type: keyword
       required: true
       description: >
-        PLEASE UPDATE DOCUMENTATION
+        Unique identifier of an audit record.
+    - name: RecordType
+      type: integer # TODO: enrich based on the enum definition at https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema#auditlogrecordtype
+      required: true
+      description: >
+        The type of operation indicated by the record. See the AuditLogRecordType table for details
+         on the types of audit log records.
+    - name: CreationTime
+      type: date # TODO: can you add a format key here too?
+      required: true
+      description: >
+        The date and time in Coordinated Universal Time (UTC) when the user performed the activity.
+    - name: Operation
+      type: keyword
+      required: true
+      description: >
+        The name of the user or admin activity. For a description of the most common operations/activities, see Search the audit log in the Office 365 Protection Center. For Exchange admin activity, this property identifies the name of the cmdlet that was run. For Dlp events, this can be DlpRuleMatch, DlpRuleUndo or DlpInfo, which are described under DLP schema.
+    - name: OrganizationId
+      type: keyword
+      required: true
+      description: >
+        The GUID for your organization's Office 365 tenant. This value will always be the same for your organization, regardless of the Office 365 service in which it occurs.
+    - name: UserType
+      type: integer
+      required: true
+      description: >
+        The type of user that performed the operation. See the UserType table for details on the types of users.
+    - name: UserKey
+      type: keyword
+      required: true
+      description: >
+        An alternative ID for the user identified in the UserId property. For example, this property is populated with the passport unique ID (PUID) for events performed by users in SharePoint, OneDrive for Business, and Exchange. This property may also specify the same value as the UserID property for events occurring in other services and events performed by system accounts.
+    - name: Workload
+      type: keyword
+      required: false
+      description: >
+        The Office 365 service where the activity occurred.
+    - name: ResultStatus
+      type: keyword
+      required: false
+      description: >
+        Indicates whether the action (specified in the Operation property) was successful or not. Possible values are Succeeded, PartiallySucceeded, or Failed. For Exchange admin activity, the value is either True or False.
+        Important Different workloads may overwrite the value of the ResultStatus property. For example, for Azure Active Directory STS logon events, a value of Succeeded for ResultStatus indicates only that the HTTP operation was successful; it doesn't mean the logon was successful. To determine if the actual logon was successful or not, see the LogonError property in the Azure Active Directory STS Logon schema. If the logon failed, the value of this property will contain the reason for the failed logon attempt.
+    - name: ObjectId
+      type: keyword
+      required: false
+      description: >
+        For SharePoint and OneDrive for Business activity, the full path name of the file or folder accessed by the user. For Exchange admin audit logging, the name of the object that was modified by the cmdlet.
+    - name: UserId
+      type: keyword
+      required: true
+      description: >
+        The UPN (User Principal Name) of the user who performed the action (specified in the Operation property) that resulted in the record being logged; for example, my_name@my_domain_name. Note that records for activity performed by system accounts (such as SHAREPOINT\system or NT AUTHORITY\SYSTEM) are also included.
+    - name: ClientIP
+      type: ip
+      required: false # Common Schema says it's required, but it doesn't appear in Teams events
+      description: >
+        The IP address of the device that was used when the activity was logged. The IP address is displayed in either an IPv4 or IPv6 address format.
+    - name: Scope
+      type: keyword
+      required: false
+      description: >
+        Was this event created by a hosted O365 service or an on-premises server? Possible values are online and onprem. Note that SharePoint is the only workload currently sending events from on-premises to O365.

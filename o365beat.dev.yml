@@ -1,0 +1,27 @@
+################### O365beat Development Configuration  #######################
+
+# A config file that doesn't get nuked by "make update". "real" stuff goes in
+# _meta/beat.yml
+
+# > ./o365beat --path.config . -c o365beat.dev.yml -e --strict.perms=false
+
+o365beat:
+  period: 30s
+
+  # > set -a; . ./o365beat.env; set +a;
+  tenant_domain: ${O365BEAT_TENANT_DOMAIN}
+  client_secret: ${O365BEAT_CLIENT_SECRET}
+  client_id:     ${O365BEAT_CLIENT_ID}     # aka application id (GUID)
+  directory_id:  ${O365BEAT_DIRECTORY_ID}  # aka tenant id (GUID)
+  registry_file_path: ./tmp/o365beat.registry.txt
+
+  content_types:
+    - Audit.AzureActiveDirectory
+    - Audit.Exchange
+    - Audit.SharePoint
+    - Audit.General
+    # - DLP.All
+
+output.file:
+  path: "./tmp/"
+  filename: o365beat.json
