@@ -1,6 +1,5 @@
-o365beat:
-  period: 1s
-processors:
+# TODO: update this ... if it's ever needed.
+o365beat:processors:
 - add_cloud_metadata: ~
 
 output.elasticsearch:
