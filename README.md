@@ -11,23 +11,9 @@ Ensure that this folder is at the following location:
 
 * [Golang](https://golang.org/dl/) 1.7
 
-### Init Project
-
-To get running with O365beat and also install the
-dependencies, run the following command:
-
-```bash
-make setup
-```
-
-It will create a clean git history for each major step. Note that you can always rewrite the history if you wish before pushing your changes.
-
-For further development, check out the [beat developer guide](https://www.elastic.co/guide/en/beats/libbeat/current/new-beat.html).
-
 ### Build
 
-To build the binary for O365beat run the command below. This will generate a binary
-in the same directory with the name o365beat.
+To build the binary for O365beat run the command below. This will grab vendor dependencies if you don't have them already, and generate a binary in the same directory with the name o365beat.
 
 ```bash
 make
