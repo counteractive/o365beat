@@ -30,3 +30,24 @@ copy-vendor:
 	# copy whatever version of mage beats is using into vendor directory
 	mkdir -p vendor/github.com/magefile
 	cp -R vendor/github.com/elastic/beats/vendor/github.com/magefile/mage vendor/github.com/magefile
+
+MAGE_VERSION     ?= v1.8.0
+MAGE_PRESENT     := $(shell mage --version 2> /dev/null | grep $(MAGE_VERSION))
+MAGE_IMPORT_PATH ?= github.com/elastic/beats/vendor/github.com/magefile/mage
+export MAGE_IMPORT_PATH
+
+.PHONY: mage
+mage:
+ifndef MAGE_PRESENT
+	@echo Installing mage $(MAGE_VERSION) from vendor dir.
+	@go install -ldflags="-X $(MAGE_IMPORT_PATH)/mage.gitTag=$(MAGE_VERSION)" ${MAGE_IMPORT_PATH}
+	@-mage -clean
+endif
+	@true
+
+# TODO: check for gcc and exit if it's not installed
+# TODO: check for virtualenv and exit if it's not installed
+# TODO: check for docker and check to be sure the user is in the docker group
+# $ sudo usermod -aG docker $USER
+# note: the snap version via the installer for 18.04 appears to be unsupported
+# and doesn't work well.  use the instructions for CE at https://docs.docker.com/install/linux/docker-ce/ubuntu/
