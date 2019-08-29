@@ -33,7 +33,7 @@ import (
 func init() {
 	devtools.SetBuildVariableSources(devtools.DefaultBeatBuildVariableSources)
 
-	devtools.BeatDescription = "One sentence description of the Beat."
+	devtools.BeatDescription = "Shipper for Office 365 logs from Management Activities API."
 }
 
 // Build builds the Beat binary.

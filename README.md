@@ -2,11 +2,13 @@
 
 O365beat is an open source log shipper used to fetch Office 365 audit logs from the [Office 365 Management Activity API](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference) and forward them with all the flexibility and capability provided by the [beats platform](https://github.com/elastic/beats) (specifically, [libbeat](https://github.com/elastic/beats/tree/master/libbeat)).
 
-The latest release is [v1.1.0-alpha](https://github.com/counteractive/o365beat/releases/tag/v1.1.0-alpha).
+**The latest release is [v1.2.0](https://github.com/counteractive/o365beat/releases/tag/v1.2.0)**, our first non-alpha release!  It captures the updated documentation and new ECS field mapping processor in the [default config file](./o365beat.yml).
+
+There is still a lot on the [to-do list](#tasks) and probably more than a few bugs! Please open an issue or submit a pull request if you notice any problems in testing or production.
 
 ## Getting Started with O365beat
 
-The easiest way to get started with o365beat is to use the pre-built binaries available in the [latest release](https://github.com/counteractive/o365beat/releases/tag/v1.1.0-alpha).
+The easiest way to get started with o365beat is to use the pre-built binaries available in the [latest release](https://github.com/counteractive/o365beat/releases/tag/v1.2.0).
 
 These pre-built packages include configuration files which contain all the necessary credential information to connect to the audit logs for your tenancy.  The default configuration file ([`o365beat.yml`](./o365beat.yml)) pulls this information from your environment, like so:
 
