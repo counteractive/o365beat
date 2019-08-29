@@ -332,7 +332,6 @@ func (bt *O365beat) publish(content []common.MapStr, b *beat.Beat) error {
 		for k, v := range evt {
 			fs[k] = v
 		}
-		fs["type"] = b.Info.Name //TODO: fix this ... it isn't right, it's showing x24. Check the old demo.
 		beatEvent := beat.Event{Timestamp: ts, Fields: fs}
 		bt.client.Publish(beatEvent)
 	}

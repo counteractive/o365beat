@@ -4,7 +4,6 @@ O365beat is an open source log shipper used to fetch Office 365 audit logs from 
 
 The latest release is [v1.1.0-alpha](https://github.com/counteractive/o365beat/releases/tag/v1.1.0-alpha).
 
-
 ## Getting Started with O365beat
 
 The easiest way to get started with o365beat is to use the pre-built binaries available in the [latest release](https://github.com/counteractive/o365beat/releases/tag/v1.1.0-alpha).
@@ -68,13 +67,45 @@ To run O365beat with all debugging output enabled, run:
 
 If you're receiving o365beat logs with [logstash](https://www.elastic.co/products/logstash), use the input type `beats`:
 
-```
+```ruby
 input {
   beats {
     port => "5044"
   }
 }
 ```
+
+### Schema
+
+As of [v1.2.0](https://github.com/counteractive/o365beat/releases/tag/v1.2.0), o365beat includes a [processor](https://github.com/elastic/beats/blob/master/libbeat/docs/processors-using.asciidoc#convert) to map the raw API-provided events to Elastic Common Schema ([ECS](https://www.elastic.co/guide/en/ecs/current/index.html)) fields.  This allows this beat to work with standard Kibana dashboards, including capabilities in [Elastic SIEM](https://www.elastic.co/products/siem).
+
+Implementing this as a processor means you can disable it if you don't use the ECS functionality, or change from "copy" to "rename" if you _only_ use ECS.  We may end up adding some ECS stuff in the "core" of the beat as well, but this is a decent start.
+
+See the [Office 365 Management API schema documentation](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema) for details on the raw events.  The ECS mapping is as follows (excerpt from [`o365beat.yml`](./o365beat.yml)):
+
+```yaml
+# from: https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema
+# to: https://www.elastic.co/guide/en/ecs/current/ecs-client.html
+
+processors:
+  - convert:
+      fields:
+        - {from: "Id", to: "event.id", type: string}                # ecs core
+        - {from: "RecordType", to: "event.code", type: string}      # ecs extended
+        # - {from: "CreationTime", to: "", type: ""}                # @timestamp
+        - {from: "Operation", to: "event.action", type: string}     # ecs core
+        - {from: "OrganizationId", to: "cloud.account.id", type: string} # ecs extended
+        # - {from: "UserType", to: "", type: ""}                    # no ecs mapping
+        # - {from: "UserKey", to: "", type: ""}                     # no ecs mapping
+        - {from: "Workload", to: "event.category", type: string}    # ecs core
+        - {from: "ResultStatus", to: "event.outcome", type: string} # ecs extended
+        # - {from: "ObjectId", to: "", type: ""}                    # no ecs mapping
+        - {from: "UserId", to: "user.id", type: string}             # ecs core
+        - {from: "ClientIP", to: "client.ip", type: ip}             # ecs core
+        # - {from: "Scope", to: "", type: ""}                       # no ecs mapping
+```
+
+Please open an issue or a pull request if you have suggested improvements to this approach.
 
 *If you'd like to build yourself, read on.*
 
@@ -152,3 +183,10 @@ make release
 ```
 
 This will fetch and create all images required for the build process. The whole process to finish can take several minutes.
+
+## Tasks
+
+* [ ] Tests
+* [ ] Update underlying libbeat to 7.3.x (currently 7.2.x)
+* [ ] ECS field mappings beyond the API's [common schema](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema#common-schema)
+* [x] ECS field mappings for API's [common schema](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema#common-schema)

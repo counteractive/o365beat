@@ -24,6 +24,30 @@ o365beat:
     - Audit.General
     # - DLP.All # TODO: figure out what to do with this, it's not like the rest
 
+# map Office 365 Activities API event fields to ECS fields
+# API "Common" fields: Id, RecordType, CreationTime, Operation, OrganizationId,
+#                      UserType, UserKey, Workload, ResultStatus, ObjectId,
+#                      UserId, ClientIP, Scope
+processors:
+  - convert:
+      fields:
+        - {from: "Id", to: "event.id", type: string}                # ecs core
+        - {from: "RecordType", to: "event.code", type: string}      # ecs extended
+        # - {from: "CreationTime", to: "", type: ""}                # @timestamp
+        - {from: "Operation", to: "event.action", type: string}     # ecs core
+        - {from: "OrganizationId", to: "cloud.account.id", type: string} # ecs extended
+        # - {from: "UserType", to: "", type: ""}                    # no ecs mapping
+        # - {from: "UserKey", to: "", type: ""}                     # no ecs mapping
+        - {from: "Workload", to: "event.category", type: string}    # ecs core
+        - {from: "ResultStatus", to: "event.outcome", type: string} # ecs extended
+        # - {from: "ObjectId", to: "", type: ""}                    # no ecs mapping
+        - {from: "UserId", to: "user.id", type: string}             # ecs core
+        - {from: "ClientIP", to: "client.ip", type: ip}             # ecs core
+        # - {from: "Scope", to: "", type: ""}                       # no ecs mapping
+      ignore_missing: true
+      fail_on_error: false
+      mode: copy # default
+
 #================================ General =====================================
 
 # The name of the shipper that publishes the network data. It can be used to group
