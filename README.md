@@ -63,6 +63,8 @@ To run O365beat with all debugging output enabled, run:
 ./o365beat --path.config . -c o365beat.yml -e -d "*" # add --strict.perms=false under WSL 1
 ```
 
+State is maintained in the `registry_file_path` location, by default in the working directory as `o365beat-registry.json`.  This file currently contains only a timestamp representing the creation date of the last content blob retrieved, to prevent repeat downloads.
+
 **NOTE:** By default o365beat doesn't know where to look for its configuration so you have to specify that explicitly.  If you see errors authenticating it may be the beat's not seeing your config.  Future versions will have more helpful error messages in this regard.
 
 ### Receive with Logstash
