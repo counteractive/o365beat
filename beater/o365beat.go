@@ -206,13 +206,13 @@ func (bt *O365beat) enableSubscriptions() error {
 		found := false
 		for _, sub := range subscriptions {
 			if sub["contentType"] == t {
-				logp.Debug("found subscription for contentType %s (enabled or disabled)", t)
+				logp.Debug("api", "found subscription for contentType %s (enabled or disabled)", t)
 				found = true
 				break
 			}
 		}
 		if !found {
-			logp.Debug("no subscription for configured contentType %s, appending to list to subscribe", t)
+			logp.Debug("api", "no subscription for configured contentType %s, appending to list to subscribe", t)
 			subscriptions = append(subscriptions, map[string]string{"contentType": t, "status": "disabled"})
 		}
 	}
@@ -464,35 +464,6 @@ func (bt *O365beat) Run(b *beat.Beat) error {
 		logp.Error(err)
 		return err
 	}
-
-	// // enable all subscriptions
-	// subscriptions, err := bt.listSubscriptions()
-
-	// // add subscriptions as "disabled" if they're not in listSubscription results (can return []!)
-	// for _, t := range bt.config.ContentTypes {
-	// 	found := false
-	// 	for _, s := range subscriptions {
-	// 		if s["contentType"] == t {
-	// 			logp.Debug("found subscription for contentType %s (enabled or disabled)", t)
-	// 			found = true
-	// 			break
-	// 		}
-	// 	}
-	// 	if !found {
-	// 		logp.Debug("no subscription for configured contentType %s, appending to list to subscribe", t)
-	// 		subscriptions = append(subscriptions, map[string]string{"contentType": t, "status": "disabled"})
-	// 	}
-	// }
-
-	// for _, sub := range subscriptions {
-	// 	if sub["status"] != "enabled" {
-	// 		_, err := bt.subscribe(sub["contentType"])
-	// 		if err != nil {
-	// 			logp.Error(err)
-	// 			return err
-	// 		}
-	// 	}
-	// }
 
 	// registry (state) is just the most recent "contentCreated" for processed blobs
 	// storing a timestamp means that blob and all before have been published.
