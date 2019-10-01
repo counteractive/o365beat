@@ -114,7 +114,8 @@ func (bt *O365beat) apiRequest(verb, urlStr string, body, query, headers map[str
 		logp.Error(err)
 		return nil, err
 	} else if res.StatusCode != 200 {
-		err = fmt.Errorf("non-200 status during api request.\n\treq: %v\n\tres: %v", req, res)
+		body, err := ioutil.ReadAll(res.Body)
+		err = fmt.Errorf("non-200 status during api request.\n\tnewly enabled or newly subscribed feeds can take 12 hours or more to provide data.\n\tconfirm audit log searching is enabled for the target tenancy (https://docs.microsoft.com/en-us/microsoft-365/compliance/turn-audit-log-search-on-or-off#turn-on-audit-log-search).\n\treq: %v\n\tres: %v\n\t%v", req, res, string(body))
 		logp.Error(err)
 		return nil, err
 	}

@@ -2,7 +2,7 @@
 
 O365beat is an open source log shipper used to fetch Office 365 audit logs from the [Office 365 Management Activity API](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference) and forward them with all the flexibility and capability provided by the [beats platform](https://github.com/elastic/beats) (specifically, [libbeat](https://github.com/elastic/beats/tree/master/libbeat)).
 
-**The latest release is [v1.3.0](https://github.com/counteractive/o365beat/releases/tag/v1.3.0)**.  It includes additional updated documentation, retains the ECS field mapping processor in the [default config file](./o365beat.yml), and fixes an issue with the auto-subscription logic.
+**The latest release is [v1.3.1](https://github.com/counteractive/o365beat/releases/tag/v1.3.1)**.  It includes additional updated documentation, improved error messages, retains the ECS field mapping processor in the [default config file](./o365beat.yml), and fixes an issue with the auto-subscription logic.
 
 There is still a lot on the [to-do list](#tasks) and probably more than a few bugs! Please open an issue or submit a pull request if you notice any problems in testing or production.
 
@@ -41,15 +41,17 @@ See below for more details on these values.
 
 ### Prerequisites and Permissions
 
-O365beat requires access to the Office 365 Management APIs for your tenancy.  Instructions for getting this set up are available in the [Microsoft documentation](https://docs.microsoft.com/en-us/office/office-365-management-api/get-started-with-office-365-management-apis#register-your-application-in-azure-ad)
+O365beat requires that you [enable audit log search](https://docs.microsoft.com/en-us/microsoft-365/compliance/turn-audit-log-search-on-or-off#turn-on-audit-log-search) for your Office 365 tenancy, done through the Security and Compliance Center in the Office 365 Admin Portal.
 
-Once you have this set up, you'll be able to get the information needed in the config file.  One tricky thing is dealing with the odd naming conventions.  If you look in `o365beat.yml` you’ll see some of the synonyms: client id is also called the application id, and the directory id is also called the tenant id.  In the Azure portal, go to "App registrations" and you’ll see the Application (Client) ID – a GUID – right there in the application list.  If you click on that you’ll see the application (client) id and the directory (tenant) id in the top area.
+It also needs access to the Office 365 Management API: instructions for setting this up are available in the [Microsoft documentation](https://docs.microsoft.com/en-us/office/office-365-management-api/get-started-with-office-365-management-apis#register-your-application-in-azure-ad).
+
+Once you have these set up, you'll be able to get the information needed in the config file.  The naming conventions for the settings are a bit odd, in `o365beat.yml` you’ll see some of the synonyms: client id is also called the application id, and the directory id is also called the tenant id.  In the Azure portal, go to "App registrations" and you’ll see the Application (Client) ID – a GUID – right there in the application list.  If you click on that you’ll see the application (client) id and the directory (tenant) id in the top area.
 
 ![App Details in Azure Portal](./docs/o365beat-readme-1.jpg)
 
-The client secret is a little trickier, you can create them by clicking the "Certificates & secrets" link on the left there.  Be sure to copy it somewhere or you’ll have to create a new one … there’s no facility for viewing them later.  The [default config file](./o365beat.yml) expect these config values to be in your environment (i.e., as environment variables), named O365BEAT_TENANT_DOMAIN, O365BEAT_CLIENT_SECRET, etc.  You can hard-code them in that file if you like, especially when testing, just be smart about the permissions.
+The client secret is a little trickier, you can create them by clicking the "Certificates & secrets" link on the left there.  Be sure to copy it somewhere or you’ll have to create a new one … there’s no facility for viewing them later.  The [default config file](./o365beat.yml) expects these config values to be in your environment (i.e., as environment variables), named O365BEAT_TENANT_DOMAIN, O365BEAT_CLIENT_SECRET, etc.  You can hard-code them in that file if you like, especially when testing, just be smart about the permissions.
 
-Finally, the azure app registration permissions should look like this:
+Finally, the Azure app registration permissions should look like this:
 
 ![App Permissions in Azure Portal](./docs/o365beat-readme-2.jpg)
 
@@ -197,5 +199,6 @@ This will fetch and create all images required for the build process. The whole 
 
 ## Changelog
 
+* v1.3.1 - Updated documentation and improved error messages
 * v1.3.0 - Fixed auto-subscribe logic and updated documentation
 * v1.2.0 - Initial production release
