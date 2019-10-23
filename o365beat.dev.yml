@@ -13,7 +13,7 @@ o365beat:
   client_secret: ${O365BEAT_CLIENT_SECRET}
   client_id:     ${O365BEAT_CLIENT_ID}     # aka application id (GUID)
   directory_id:  ${O365BEAT_DIRECTORY_ID}  # aka tenant id (GUID)
-  registry_file_path: ./tmp/o365beat.registry.txt
+  registry_file_path: ./tmp/o365beat.state
 
   content_types:
     - Audit.AzureActiveDirectory
@@ -28,11 +28,17 @@ o365beat:
 #                      UserId, ClientIP, Scope
 # TODO: Docs say event.created = time created in pipeline (not CreationTime)
 processors:
+  - dissect:
+      field: "ClientIP"
+      tokenizer: "[%{clientip}]:%{clientport}"
+      when:
+        contains:
+          ClientIP: "["
   - convert:
       fields:
         - {from: "Id", to: "event.id", type: string}                # ecs core
         - {from: "RecordType", to: "event.code", type: string}      # ecs extended
-        # - {from: "CreationTime", to: ""}                          # @timestamp, TODO logic
+        # - {from: "CreationTime", to: "", type: ""}                # @timestamp
         - {from: "Operation", to: "event.action", type: string}     # ecs core
         - {from: "OrganizationId", to: "cloud.account.id", type: string} # ecs extended
         # - {from: "UserType", to: "", type: ""}                    # no ecs mapping
@@ -42,6 +48,7 @@ processors:
         # - {from: "ObjectId", to: "", type: ""}                    # no ecs mapping
         - {from: "UserId", to: "user.id", type: string}             # ecs core
         - {from: "ClientIP", to: "client.ip", type: ip}             # ecs core
+        - {from: "dissect.clientip", to: "client.ip", type: ip}     # ecs core
         # - {from: "Scope", to: "", type: ""}                       # no ecs mapping
       ignore_missing: true
       fail_on_error: false

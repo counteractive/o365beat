@@ -29,6 +29,12 @@ o365beat:
 #                      UserType, UserKey, Workload, ResultStatus, ObjectId,
 #                      UserId, ClientIP, Scope
 processors:
+  - dissect:
+    field: "ClientIP"
+    tokenizer: "[%{clientip}]:%{clientport}"
+    when:
+      contains:
+        ClientIP: "["
   - convert:
       fields:
         - {from: "Id", to: "event.id", type: string}                # ecs core
@@ -42,6 +48,7 @@ processors:
         - {from: "ResultStatus", to: "event.outcome", type: string} # ecs extended
         # - {from: "ObjectId", to: "", type: ""}                    # no ecs mapping
         - {from: "UserId", to: "user.id", type: string}             # ecs core
+        # - {from: "dissect.ClientIP", to: "client.ip", type: ip}     # ecs core
         - {from: "ClientIP", to: "client.ip", type: ip}             # ecs core
         # - {from: "Scope", to: "", type: ""}                       # no ecs mapping
       ignore_missing: true

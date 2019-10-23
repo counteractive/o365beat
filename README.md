@@ -188,6 +188,8 @@ The beat frameworks provides tools to cross-compile and package your beat for di
 make release
 ```
 
+Be sure you have python, virtualenv, gcc, and docker installed, and that the user you're using to build the release is in the `docker` group (if not, it'll just hang with no helpful error message).
+
 This will fetch and create all images required for the build process. The whole process to finish can take several minutes.
 
 ## Tasks
