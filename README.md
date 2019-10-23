@@ -2,7 +2,7 @@
 
 O365beat is an open source log shipper used to fetch Office 365 audit logs from the [Office 365 Management Activity API](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference) and forward them with all the flexibility and capability provided by the [beats platform](https://github.com/elastic/beats) (specifically, [libbeat](https://github.com/elastic/beats/tree/master/libbeat)).
 
-**The latest release is [v1.4.0](https://github.com/counteractive/o365beat/releases/tag/v1.4.0)**.  It includes additional updated documentation, improved error messages, retains the ECS field mapping processor in the [default config file](./o365beat.yml), and fixes an issue with the auto-subscription logic.
+**The latest release is [v1.4.0](https://github.com/counteractive/o365beat/releases/tag/v1.4.0)**.  It updates the underlying `libbeat` version to 7.4.0 and fixes a throttling issue when downloading content.
 
 There is still a lot on the [to-do list](#tasks) and probably more than a few bugs! Please open an issue or submit a pull request if you notice any problems in testing or production.
 
@@ -199,7 +199,7 @@ This will fetch and create all images required for the build process. The whole 
 
 ## Changelog
 
-* v1.4.0 - Bumped libbeat to v7.4.0, fixed throttling issue, and added kibana visualizations and dashboards
+* v1.4.0 - Bumped libbeat to v7.4.0 and fixed throttling issue
 * v1.3.1 - Updated documentation and improved error messages
 * v1.3.0 - Fixed auto-subscribe logic and updated documentation
 * v1.2.0 - Initial production release
