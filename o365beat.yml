@@ -13,7 +13,7 @@ o365beat:
   client_secret: ${O365BEAT_CLIENT_SECRET:}
   client_id:     ${O365BEAT_CLIENT_ID:}     # aka application id (GUID)
   directory_id:  ${O365BEAT_DIRECTORY_ID:}  # aka tenant id (GUID)
-  registry_file_path: ${O365BEAT_REGISTRY_PATH:./o365beat-registry.json}
+  registry_file_path: ${O365BEAT_REGISTRY_PATH:./o365beat.state}
 
   # the following content types will be pulled from the API
   # for available types, see https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference#working-with-the-office-365-management-activity-api
@@ -24,7 +24,7 @@ o365beat:
     - Audit.General
     # - DLP.All # TODO: figure out what to do with this, it's not like the rest
 
-# map Office 365 Activities API event fields to ECS fields
+# By default, map Office 365 Activities API event fields to ECS fields
 # API "Common" fields: Id, RecordType, CreationTime, Operation, OrganizationId,
 #                      UserType, UserKey, Workload, ResultStatus, ObjectId,
 #                      UserId, ClientIP, Scope
@@ -47,7 +47,6 @@ processors:
       ignore_missing: true
       fail_on_error: false
       mode: copy # default
-
 #================================ General =====================================
 
 # The name of the shipper that publishes the network data. It can be used to group
@@ -95,7 +94,7 @@ setup.kibana:
 
 #============================= Elastic Cloud ==================================
 
-# These settings simplify using o365beat with the Elastic Cloud (https://cloud.elastic.co/).
+# These settings simplify using O365beat with the Elastic Cloud (https://cloud.elastic.co/).
 
 # The cloud.id setting overwrites the `output.elasticsearch.hosts` and
 # `setup.kibana.host` options.
@@ -154,13 +153,18 @@ processors:
 # "publish", "service".
 #logging.selectors: ["*"]
 
-#============================== Xpack Monitoring ===============================
+#============================== X-Pack Monitoring ===============================
 # o365beat can export internal metrics to a central Elasticsearch monitoring
 # cluster.  This requires xpack monitoring to be enabled in Elasticsearch.  The
 # reporting is disabled by default.
 
 # Set to true to enable the monitoring reporter.
 #monitoring.enabled: false
+
+# Sets the UUID of the Elasticsearch cluster under which monitoring data for this
+# O365beat instance will appear in the Stack Monitoring UI. If output.elasticsearch
+# is enabled, the UUID is derived from the Elasticsearch cluster referenced by output.elasticsearch.
+#monitoring.cluster_uuid:
 
 # Uncomment to send the metrics to Elasticsearch. Most settings from the
 # Elasticsearch output are accepted here as well.

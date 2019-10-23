@@ -2,13 +2,13 @@
 
 O365beat is an open source log shipper used to fetch Office 365 audit logs from the [Office 365 Management Activity API](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference) and forward them with all the flexibility and capability provided by the [beats platform](https://github.com/elastic/beats) (specifically, [libbeat](https://github.com/elastic/beats/tree/master/libbeat)).
 
-**The latest release is [v1.3.1](https://github.com/counteractive/o365beat/releases/tag/v1.3.1)**.  It includes additional updated documentation, improved error messages, retains the ECS field mapping processor in the [default config file](./o365beat.yml), and fixes an issue with the auto-subscription logic.
+**The latest release is [v1.4.0](https://github.com/counteractive/o365beat/releases/tag/v1.4.0)**.  It includes additional updated documentation, improved error messages, retains the ECS field mapping processor in the [default config file](./o365beat.yml), and fixes an issue with the auto-subscription logic.
 
 There is still a lot on the [to-do list](#tasks) and probably more than a few bugs! Please open an issue or submit a pull request if you notice any problems in testing or production.
 
 ## Getting Started with O365beat
 
-The easiest way to get started with o365beat is to use the pre-built binaries available in the [latest release](https://github.com/counteractive/o365beat/releases/tag/v1.3.0).
+The easiest way to get started with o365beat is to use the pre-built binaries available in the [latest release](https://github.com/counteractive/o365beat/releases/tag/v1.4.0).
 
 These pre-built packages include configuration files which contain all the necessary credential information to connect to the audit logs for your tenancy.  The default configuration file ([`o365beat.yml`](./o365beat.yml)) pulls this information from your environment, like so:
 
@@ -193,12 +193,13 @@ This will fetch and create all images required for the build process. The whole 
 ## Tasks
 
 * [ ] Tests
-* [ ] Update underlying libbeat to 7.3.x (currently 7.2.x)
 * [ ] ECS field mappings beyond the API's [common schema](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema#common-schema)
+* [x] Update underlying libbeat to ~~7.3.x~~ 7.4.x (currently 7.2.x)
 * [x] ECS field mappings for API's [common schema](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema#common-schema)
 
 ## Changelog
 
+* v1.4.0 - Bumped libbeat to v7.4.0 and added kibana visualizations and dashboards
 * v1.3.1 - Updated documentation and improved error messages
 * v1.3.0 - Fixed auto-subscribe logic and updated documentation
 * v1.2.0 - Initial production release
