@@ -199,7 +199,7 @@ This will fetch and create all images required for the build process. The whole 
 
 ## Changelog
 
-* v1.4.0 - Bumped libbeat to v7.4.0 and added kibana visualizations and dashboards
+* v1.4.0 - Bumped libbeat to v7.4.0, fixed throttling issue, and added kibana visualizations and dashboards
 * v1.3.1 - Updated documentation and improved error messages
 * v1.3.0 - Fixed auto-subscribe logic and updated documentation
 * v1.2.0 - Initial production release

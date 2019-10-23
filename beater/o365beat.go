@@ -346,7 +346,10 @@ func (bt *O365beat) listAllAvailableContent(start, end time.Time) ([]map[string]
 // getContent gets actual content blobs
 func (bt *O365beat) getContent(urlStr string) ([]common.MapStr, error) {
 	logp.Debug("api", "getting content from %v.", urlStr)
-	res, err := bt.apiRequest("GET", urlStr, nil, nil, nil)
+	query := map[string]string{
+		"PublisherIdentifier": bt.config.DirectoryID,
+	}
+	res, err := bt.apiRequest("GET", urlStr, nil, query, nil)
 	if err != nil {
 		logp.Error(err)
 		return nil, err
