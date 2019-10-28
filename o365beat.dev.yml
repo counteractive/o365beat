@@ -63,9 +63,12 @@ processors:
 # output.console:
 #   pretty: true
 
-output.file:
-  path: "./tmp/"
-  filename: o365beat.json
+# output.file:
+#   path: "./tmp/"
+#   filename: o365beat.json
+
+output.elasticsearch:
+  hosts: ["http://localhost:9200"]
 
 # output.logstash:
 #   hosts:

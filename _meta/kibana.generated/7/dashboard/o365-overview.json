@@ -1,0 +1,162 @@
+{
+    "objects": [
+        {
+            "attributes": {
+                "description": "", 
+                "hits": 0, 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "optionsJSON": "{\"useMargins\": true, \"hidePanelTitles\": false}", 
+                "panelsJSON": "[{\"gridData\": {\"y\": 0, \"x\": 0, \"i\": \"013fbd43-c032-427d-a924-bdc01121d2cc\", \"w\": 28, \"h\": 12}, \"panelRefName\": \"panel_0\", \"version\": \"7.4.0\", \"panelIndex\": \"013fbd43-c032-427d-a924-bdc01121d2cc\", \"embeddableConfig\": {}}, {\"gridData\": {\"y\": 0, \"x\": 28, \"i\": \"7e6a30f5-76b9-476b-8be0-c7b70b5eea9c\", \"w\": 20, \"h\": 12}, \"panelRefName\": \"panel_1\", \"version\": \"7.4.0\", \"panelIndex\": \"7e6a30f5-76b9-476b-8be0-c7b70b5eea9c\", \"embeddableConfig\": {}}, {\"gridData\": {\"y\": 12, \"x\": 0, \"i\": \"21347b55-b5b5-4214-925d-5c4df8a0f79b\", \"w\": 28, \"h\": 15}, \"panelRefName\": \"panel_2\", \"version\": \"7.4.0\", \"panelIndex\": \"21347b55-b5b5-4214-925d-5c4df8a0f79b\", \"embeddableConfig\": {}}, {\"gridData\": {\"y\": 12, \"x\": 28, \"i\": \"293993a2-d046-45db-9d0b-75922cb6c043\", \"w\": 20, \"h\": 15}, \"panelRefName\": \"panel_3\", \"version\": \"7.4.0\", \"panelIndex\": \"293993a2-d046-45db-9d0b-75922cb6c043\", \"embeddableConfig\": {}}]", 
+                "timeRestore": false, 
+                "title": "o365 overview", 
+                "version": 1
+            }, 
+            "id": "a1da8500-f739-11e9-9f4d-5dd1f9c9e483", 
+            "migrationVersion": {
+                "dashboard": "7.3.0"
+            }, 
+            "references": [
+                {
+                    "id": "78462670-f76d-11e9-9f4d-5dd1f9c9e483", 
+                    "name": "panel_0", 
+                    "type": "search"
+                }, 
+                {
+                    "id": "ec6e7b40-f9ae-11e9-9f4d-5dd1f9c9e483", 
+                    "name": "panel_1", 
+                    "type": "visualization"
+                }, 
+                {
+                    "id": "36d9f100-f739-11e9-9f4d-5dd1f9c9e483", 
+                    "name": "panel_2", 
+                    "type": "visualization"
+                }, 
+                {
+                    "id": "22f05390-f73a-11e9-9f4d-5dd1f9c9e483", 
+                    "name": "panel_3", 
+                    "type": "visualization"
+                }
+            ], 
+            "type": "dashboard", 
+            "updated_at": "2019-10-28T19:47:20.350Z", 
+            "version": "WzEyMCwxXQ=="
+        }, 
+        {
+            "attributes": {
+                "columns": [
+                    "event.action", 
+                    "Name", 
+                    "event.severity"
+                ], 
+                "description": "", 
+                "hits": 0, 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"event.action:AlertTriggered\", \"language\": \"kuery\"}, \"indexRefName\": \"kibanaSavedObjectMeta.searchSourceJSON.index\", \"version\": true, \"highlightAll\": false}"
+                }, 
+                "sort": [
+                    [
+                        "@timestamp", 
+                        "desc"
+                    ]
+                ], 
+                "title": "o365 alerts", 
+                "version": 1
+            }, 
+            "id": "78462670-f76d-11e9-9f4d-5dd1f9c9e483", 
+            "migrationVersion": {
+                "search": "7.4.0"
+            }, 
+            "references": [
+                {
+                    "id": "ceb2f990-f469-11e9-9f4d-5dd1f9c9e483", 
+                    "name": "kibanaSavedObjectMeta.searchSourceJSON.index", 
+                    "type": "index-pattern"
+                }
+            ], 
+            "type": "search", 
+            "updated_at": "2019-10-28T18:08:08.624Z", 
+            "version": "WzEwMiwxXQ=="
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}, \"indexRefName\": \"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+                }, 
+                "title": "o365 client ips", 
+                "uiStateJSON": "\"{}\"", 
+                "version": 1, 
+                "visState": "{\"params\": {\"isDonut\": true, \"dimensions\": {\"metric\": {\"aggType\": \"count\", \"params\": {}, \"accessor\": 1, \"format\": {\"id\": \"number\"}}, \"buckets\": [{\"aggType\": \"terms\", \"params\": {}, \"accessor\": 0, \"format\": {\"params\": {\"missingBucketLabel\": \"Missing\", \"id\": \"string\", \"otherBucketLabel\": \"Other\"}, \"id\": \"terms\"}}]}, \"type\": \"pie\", \"labels\": {\"values\": true, \"last_level\": true, \"truncate\": 100, \"show\": false}, \"legendPosition\": \"right\", \"addLegend\": true, \"addTooltip\": true}, \"type\": \"pie\", \"aggs\": [{\"type\": \"count\", \"enabled\": true, \"id\": \"1\", \"params\": {}, \"schema\": \"metric\"}, {\"type\": \"terms\", \"enabled\": true, \"id\": \"2\", \"params\": {\"orderBy\": \"1\", \"missingBucket\": false, \"customLabel\": \"Client IP\", \"missingBucketLabel\": \"Missing\", \"field\": \"client.ip.keyword\", \"otherBucketLabel\": \"Other\", \"otherBucket\": true, \"order\": \"desc\", \"size\": 10}, \"schema\": \"segment\"}], \"title\": \"o365 client ips\"}"
+            }, 
+            "id": "ec6e7b40-f9ae-11e9-9f4d-5dd1f9c9e483", 
+            "migrationVersion": {
+                "visualization": "7.3.1"
+            }, 
+            "references": [
+                {
+                    "id": "ceb2f990-f469-11e9-9f4d-5dd1f9c9e483", 
+                    "name": "kibanaSavedObjectMeta.searchSourceJSON.index", 
+                    "type": "index-pattern"
+                }
+            ], 
+            "type": "visualization", 
+            "updated_at": "2019-10-28T18:15:29.780Z", 
+            "version": "WzExMCwxXQ=="
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}, \"indexRefName\": \"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+                }, 
+                "title": "o365 user actions", 
+                "uiStateJSON": "{\"vis\": {\"params\": {\"sort\": {\"columnIndex\": null, \"direction\": null}}}}", 
+                "version": 1, 
+                "visState": "{\"params\": {\"sort\": {\"columnIndex\": null, \"direction\": null}, \"perPage\": 15, \"dimensions\": {\"metrics\": [{\"aggType\": \"count\", \"params\": {}, \"accessor\": 2, \"format\": {\"id\": \"number\"}}], \"buckets\": [{\"aggType\": \"terms\", \"params\": {}, \"accessor\": 0, \"format\": {\"params\": {\"missingBucketLabel\": \"Missing\", \"id\": \"string\", \"otherBucketLabel\": \"Other\"}, \"id\": \"terms\"}}, {\"aggType\": \"terms\", \"params\": {}, \"accessor\": 1, \"format\": {\"params\": {\"missingBucketLabel\": \"Missing\", \"id\": \"string\", \"otherBucketLabel\": \"Other\"}, \"id\": \"terms\"}}]}, \"showPartialRows\": false, \"showMetricsAtAllLevels\": false, \"totalFunc\": \"sum\", \"percentageCol\": \"\", \"showTotal\": false}, \"type\": \"table\", \"aggs\": [{\"type\": \"count\", \"enabled\": true, \"id\": \"1\", \"params\": {}, \"schema\": \"metric\"}, {\"type\": \"terms\", \"enabled\": true, \"id\": \"2\", \"params\": {\"orderBy\": \"1\", \"missingBucket\": false, \"customLabel\": \"User\", \"missingBucketLabel\": \"Missing\", \"field\": \"user.id.keyword\", \"otherBucketLabel\": \"Other\", \"otherBucket\": false, \"order\": \"desc\", \"size\": 20}, \"schema\": \"bucket\"}, {\"type\": \"terms\", \"enabled\": true, \"id\": \"3\", \"params\": {\"orderBy\": \"1\", \"missingBucket\": false, \"customLabel\": \"Action\", \"missingBucketLabel\": \"Missing\", \"field\": \"event.action.keyword\", \"otherBucketLabel\": \"Other\", \"otherBucket\": false, \"order\": \"desc\", \"size\": 20}, \"schema\": \"bucket\"}], \"title\": \"o365 user actions\"}"
+            }, 
+            "id": "36d9f100-f739-11e9-9f4d-5dd1f9c9e483", 
+            "migrationVersion": {
+                "visualization": "7.3.1"
+            }, 
+            "references": [
+                {
+                    "id": "ceb2f990-f469-11e9-9f4d-5dd1f9c9e483", 
+                    "name": "kibanaSavedObjectMeta.searchSourceJSON.index", 
+                    "type": "index-pattern"
+                }
+            ], 
+            "type": "visualization", 
+            "updated_at": "2019-10-25T15:07:51.695Z", 
+            "version": "WzY0LDFd"
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"event.action:\\\"UserLoggedIn\\\"\", \"language\": \"kuery\"}, \"indexRefName\": \"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+                }, 
+                "title": "o365 unique users (logins)", 
+                "uiStateJSON": "{\"vis\": {\"params\": {\"sort\": {\"columnIndex\": null, \"direction\": null}}}}", 
+                "version": 1, 
+                "visState": "{\"params\": {\"sort\": {\"columnIndex\": null, \"direction\": null}, \"perPage\": 10, \"dimensions\": {\"metrics\": [{\"aggType\": \"count\", \"params\": {}, \"accessor\": 1, \"format\": {\"id\": \"number\"}}], \"buckets\": [{\"aggType\": \"terms\", \"params\": {}, \"accessor\": 0, \"format\": {\"params\": {\"missingBucketLabel\": \"Missing\", \"id\": \"string\", \"otherBucketLabel\": \"Other\"}, \"id\": \"terms\"}}]}, \"showPartialRows\": false, \"showMetricsAtAllLevels\": false, \"totalFunc\": \"sum\", \"percentageCol\": \"\", \"showTotal\": false}, \"type\": \"table\", \"aggs\": [{\"type\": \"count\", \"enabled\": true, \"id\": \"1\", \"params\": {}, \"schema\": \"metric\"}, {\"type\": \"terms\", \"enabled\": true, \"id\": \"2\", \"params\": {\"orderBy\": \"1\", \"missingBucket\": false, \"customLabel\": \"User ID\", \"missingBucketLabel\": \"Missing\", \"field\": \"user.id.keyword\", \"otherBucketLabel\": \"Other\", \"otherBucket\": false, \"order\": \"desc\", \"size\": 10000}, \"schema\": \"bucket\"}], \"title\": \"o365 unique users (logins)\"}"
+            }, 
+            "id": "22f05390-f73a-11e9-9f4d-5dd1f9c9e483", 
+            "migrationVersion": {
+                "visualization": "7.3.1"
+            }, 
+            "references": [
+                {
+                    "id": "ceb2f990-f469-11e9-9f4d-5dd1f9c9e483", 
+                    "name": "kibanaSavedObjectMeta.searchSourceJSON.index", 
+                    "type": "index-pattern"
+                }
+            ], 
+            "type": "visualization", 
+            "updated_at": "2019-10-28T18:15:54.077Z", 
+            "version": "WzExMSwxXQ=="
+        }
+    ], 
+    "version": "7.4.0"
+}
