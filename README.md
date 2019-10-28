@@ -2,15 +2,18 @@
 
 O365beat is an open source log shipper used to fetch Office 365 audit logs from the [Office 365 Management Activity API](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference) and forward them with all the flexibility and capability provided by the [beats platform](https://github.com/elastic/beats) (specifically, [libbeat](https://github.com/elastic/beats/tree/master/libbeat)).
 
-**The latest release is [v1.4.0](https://github.com/counteractive/o365beat/releases/tag/v1.4.0)**.  It updates the underlying `libbeat` version to 7.4.0 and fixes a throttling issue when downloading content.
+**The latest release is [v1.4.1](https://github.com/counteractive/o365beat/releases/tag/v1.4.1)**.  It:
 
-There is still a lot on the [to-do list](#tasks) and probably more than a few bugs! Please open an issue or submit a pull request if you notice any problems in testing or production.
+1. Includes new kibana visualizations and a dashboard, showing `AlertTriggered` events from Microsoft's Advanced Threat Protection service, a chart of common client IP addresses, a list of unique users, and a running stream of summarized activity.
+1. Updates processors to better handle certain log fields.  Specifically, the API provides `Parameters` and `ExtendedProperties` fields as arrays of objects with just `Name` and `Value` keys, which is _very_ confusing and difficult to work with, and causes issues with elasticsearch.  This version stores those as strings, which can then be deserialized or parsed with string-based tools.  Most importantly, it stops indexing errors and dropped events.
+
+There is still a lot on the [to-do list](#tasks) and probably more than a few bugs still hiding out there! Please open an issue or submit a pull request if you notice any problems in testing or production.
 
 ## Getting Started with O365beat
 
-The easiest way to get started with o365beat is to use the pre-built binaries available in the [latest release](https://github.com/counteractive/o365beat/releases/tag/v1.4.0).
+The easiest way to get started with o365beat is to use the pre-built binaries available in the [latest release](https://github.com/counteractive/o365beat/releases/latest/).
 
-These pre-built packages include configuration files which contain all the necessary credential information to connect to the audit logs for your tenancy.  The default configuration file ([`o365beat.yml`](./o365beat.yml)) pulls this information from your environment, like so:
+These pre-built packages include configuration files which contain all the necessary credential information to connect to the audit logs for your tenancy.  The default configuration file ([`o365beat.yml`](./_meta/beat.yml)) pulls this information from your environment, like so:
 
 ```yaml
 o365beat:
@@ -83,11 +86,11 @@ input {
 
 ### Schema
 
-As of [v1.2.0](https://github.com/counteractive/o365beat/releases/tag/v1.2.0), o365beat includes a [processor](https://github.com/elastic/beats/blob/master/libbeat/docs/processors-using.asciidoc#convert) to map the raw API-provided events to Elastic Common Schema ([ECS](https://www.elastic.co/guide/en/ecs/current/index.html)) fields.  This allows this beat to work with standard Kibana dashboards, including capabilities in [Elastic SIEM](https://www.elastic.co/products/siem).
+As of v1.2.0, o365beat includes a [processor](https://github.com/elastic/beats/blob/master/libbeat/docs/processors-using.asciidoc#convert) to map the raw API-provided events to Elastic Common Schema ([ECS](https://www.elastic.co/guide/en/ecs/current/index.html)) fields.  This allows this beat to work with standard Kibana dashboards, including capabilities in [Elastic SIEM](https://www.elastic.co/products/siem).  Updates in v1.4.0 and v1.4.1 corrected some parsing issues and included at least one more ECS field.
 
-Implementing this as a processor means you can disable it if you don't use the ECS functionality, or change from "copy" to "rename" if you _only_ use ECS.  We may end up adding some ECS stuff in the "core" of the beat as well, but this is a decent start.
+Implementing this as a processor means you can disable it if you don't use the ECS functionality, or change from "copy" to "rename" if you _only_ use ECS.  We may end up adding some ECS stuff in the "core" of the beat as well, but this is a decent start.  These processors are critical for the proper functioning of the beat and its visualizations.  Disabling or modifying them can lead to dropped events or other issues.  **Please update with caution.**
 
-See the [Office 365 Management API schema documentation](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema) for details on the raw events.  The ECS mapping is as follows (excerpt from [`o365beat.yml`](./o365beat.yml)):
+See the [Office 365 Management API schema documentation](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema) for details on the raw events.  The ECS mapping is as follows (excerpt from [`o365beat.yml`](./_meta/beat.yml)):
 
 ```yaml
 # from: https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema
@@ -96,19 +99,26 @@ See the [Office 365 Management API schema documentation](https://docs.microsoft.
 processors:
   - convert:
       fields:
-        - {from: "Id", to: "event.id", type: string}                # ecs core
-        - {from: "RecordType", to: "event.code", type: string}      # ecs extended
-        # - {from: "CreationTime", to: "", type: ""}                # @timestamp
-        - {from: "Operation", to: "event.action", type: string}     # ecs core
-        - {from: "OrganizationId", to: "cloud.account.id", type: string} # ecs extended
-        # - {from: "UserType", to: "", type: ""}                    # no ecs mapping
-        # - {from: "UserKey", to: "", type: ""}                     # no ecs mapping
-        - {from: "Workload", to: "event.category", type: string}    # ecs core
-        - {from: "ResultStatus", to: "event.outcome", type: string} # ecs extended
-        # - {from: "ObjectId", to: "", type: ""}                    # no ecs mapping
-        - {from: "UserId", to: "user.id", type: string}             # ecs core
-        - {from: "ClientIP", to: "client.ip", type: ip}             # ecs core
-        # - {from: "Scope", to: "", type: ""}                       # no ecs mapping
+        - {from: Id, to: 'event.id', type: string}                # ecs core
+        - {from: RecordType, to: 'event.code', type: string}      # ecs extended
+        # - {from: "CreationTime", to: "", type: ""}              # @timestamp
+        - {from: Operation, to: 'event.action', type: string}     # ecs core
+        - {from: OrganizationId, to: 'cloud.account.id', type: string} # ecs extended
+        # - {from: UserType, to: '', type: ''}                    # no ecs mapping
+        # - {from: UserKey, to: '', type: ''}                     # no ecs mapping
+        - {from: Workload, to: 'event.category', type: string}    # ecs core
+        - {from: ResultStatus, to: 'event.outcome', type: string} # ecs extended
+        # - {from: ObjectId, to: '', type: ''}                    # no ecs mapping
+        - {from: UserId, to: 'user.id', type: string}             # ecs core
+        - {from: ClientIP, to: 'client.ip', type: ip}             # ecs core
+        - {from: 'dissect.clientip', to: 'client.ip', type: ip}   # ecs core
+        # - {from: "Scope", to: "", type: ""}                     # no ecs mapping
+        - {from: Severity, to: 'event.severity', type: string}    # ecs core
+        # the following fields use the challenging array-of-name-value-pairs format
+        # converting them to strings fixes issues in elastic, eases non-script parsing
+        # easier to rehydrate into arrays from strings than vice versa:
+        - {from: Parameters, type: string}                        # no ecs mapping
+        - {from: ExtendedProperties, type: string}                # no ecs mapping
 ```
 
 Please open an issue or a pull request if you have suggested improvements to this approach.
@@ -196,11 +206,13 @@ This will fetch and create all images required for the build process. The whole 
 
 * [ ] Tests
 * [ ] ECS field mappings beyond the API's [common schema](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema#common-schema)
+* [x] Add visualizations and dashboard
 * [x] Update underlying libbeat to ~~7.3.x~~ 7.4.x (currently 7.2.x)
 * [x] ECS field mappings for API's [common schema](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema#common-schema)
 
 ## Changelog
 
+* v1.4.1 - Added kibana visualizations and dashboard and updated processors to better handle fields containing data arrays
 * v1.4.0 - Bumped libbeat to v7.4.0 and fixed throttling issue
 * v1.3.1 - Updated documentation and improved error messages
 * v1.3.0 - Fixed auto-subscribe logic and updated documentation
