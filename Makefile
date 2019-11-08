@@ -12,6 +12,7 @@ NO_COLLECT=true
 
 # for build purposes (doesn't fix version command in cmd/root.go):
 override BEAT_VERSION=1.4.1
+override BEAT_VENDOR=Counteractive
 
 # Path to the libbeat Makefile
 -include $(LIBBEAT_MAKEFILE)

@@ -32,7 +32,7 @@ import (
 
 func init() {
 	devtools.SetBuildVariableSources(devtools.DefaultBeatBuildVariableSources)
-
+	devtools.BeatVendor = "Counteractive"
 	devtools.BeatDescription = "Shipper for Office 365 logs from Management Activities API."
 }
 
