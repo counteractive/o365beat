@@ -51,7 +51,6 @@ processors:
         - {from: ClientIP, to: 'client.ip', type: ip}             # ecs core
         - {from: 'dissect.clientip', to: 'client.ip', type: ip}   # ecs core
         # - {from: "Scope", to: "", type: ""}                     # no ecs mapping
-        - {from: Severity, to: 'event.severity', type: string}    # ecs core
         # the following fields use the challenging array-of-name-value-pairs format
         # converting them to strings fixes issues in elastic, eases non-script parsing
         # easier to rehydrate into arrays from strings than vice versa:

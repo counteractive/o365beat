@@ -3,6 +3,7 @@
 o365beat.env
 tmp/
 archive/
+logs/
 .vscode/
 /.idea
 
