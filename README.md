@@ -2,12 +2,12 @@
 
 O365beat is an open source log shipper used to fetch Office 365 audit logs from the [Office 365 Management Activity API](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference) and forward them with all the flexibility and capability provided by the [beats platform](https://github.com/elastic/beats) (specifically, [libbeat](https://github.com/elastic/beats/tree/master/libbeat)).
 
-**The latest release is [v1.4.1](https://github.com/counteractive/o365beat/releases/tag/v1.4.1)**.  It:
+**The latest release is [v1.4.2](https://github.com/counteractive/o365beat/releases/latest)**.  It:
 
-1. Includes new kibana visualizations and a dashboard, showing `AlertTriggered` events from Microsoft's Advanced Threat Protection service, a chart of common client IP addresses, a list of unique users, and a running stream of summarized activity.
-1. Updates processors to better handle certain log fields.  Specifically, the API provides `Parameters` and `ExtendedProperties` fields as arrays of objects with just `Name` and `Value` keys, which is _very_ confusing and difficult to work with, and causes issues with elasticsearch.  This version stores those as strings, which can then be deserialized or parsed with string-based tools.  Most importantly, it stops indexing errors and dropped events.
+1. Includes new kibana visualizations and a dashboard since v1.4.1, showing `AlertTriggered` events from Microsoft's Advanced Threat Protection service, a chart of common client IP addresses, a list of unique users, and a running stream of summarized activity.
+1. Updates processors to better handle certain log fields.  Specifically, the API provides `Parameters` and `ExtendedProperties` fields as arrays of objects with just `Name` and `Value` keys, which is _very_ confusing and difficult to work with, and causes issues with elasticsearch.  We found this was true of the `ModifiedProperties` field as well.  This version ships all those as strings, which can then be deserialized or parsed with string-based tools.  Most importantly, it stops indexing errors and dropped events.
 
-There is still a lot on the [to-do list](#tasks) and probably more than a few bugs still hiding out there! Please open an issue or submit a pull request if you notice any problems in testing or production.
+It closes a number of issues (#12, #13, and #14), but there is still a lot on the [to-do list](#tasks) and probably more than a few bugs still hiding out there! Please open an issue or submit a pull request if you notice any problems in testing or production.
 
 ## Getting Started with O365beat
 
@@ -85,6 +85,8 @@ input {
 ```
 
 ### Schema
+
+**NOTE: Due to a quirk in the libbeat build system, the default config file contains an additional `processors` section that gets merged into the o365beat.yml and shadows these custom ECS processors. If you don't see ECS fields, you must manually remove the second `processors` section, or merge the two.**  Please see [this issue](https://github.com/counteractive/o365beat/issues/9) for more information.
 
 As of v1.2.0, o365beat includes a [processor](https://github.com/elastic/beats/blob/master/libbeat/docs/processors-using.asciidoc#convert) to map the raw API-provided events to Elastic Common Schema ([ECS](https://www.elastic.co/guide/en/ecs/current/index.html)) fields.  This allows this beat to work with standard Kibana dashboards, including capabilities in [Elastic SIEM](https://www.elastic.co/products/siem).  Updates in v1.4.0 and v1.4.1 corrected some parsing issues and included at least one more ECS field.
 
@@ -212,6 +214,7 @@ This will fetch and create all images required for the build process. The whole 
 
 ## Changelog
 
+* v1.4.2 - Fixes multiple processor bugs (closes issues #12, #13, and #14)
 * v1.4.1 - Added kibana visualizations and dashboard and updated processors to better handle fields containing data arrays
 * v1.4.0 - Bumped libbeat to v7.4.0 and fixed throttling issue
 * v1.3.1 - Updated documentation and improved error messages

@@ -3010,7 +3010,7 @@
       description: >
         The UPN (User Principal Name) of the user who performed the action (specified in the Operation property) that resulted in the record being logged; for example, my_name@my_domain_name. Note that records for activity performed by system accounts (such as SHAREPOINT\system or NT AUTHORITY\SYSTEM) are also included.
     - name: ClientIP
-      type: ip
+      type: keyword
       required: false # Common Schema says it's required, but it doesn't appear in Teams events
       description: >
         The IP address of the device that was used when the activity was logged. The IP address is displayed in either an IPv4 or IPv6 address format.

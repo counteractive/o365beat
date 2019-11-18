@@ -11,7 +11,7 @@ MAGE_IMPORT_PATH=${BEAT_PATH}/vendor/github.com/magefile/mage
 NO_COLLECT=true
 
 # for build purposes (doesn't fix version command in cmd/root.go):
-override BEAT_VERSION=1.4.1
+override BEAT_VERSION=1.4.2
 override BEAT_VENDOR=Counteractive
 
 # Path to the libbeat Makefile
@@ -49,7 +49,7 @@ ifndef MAGE_PRESENT
 endif
 	@true
 
-# TODO: figure out how to set the version for the custom beat (BEAT_VERSION?)
+# DONE: figure out how to set the version for the custom beat (BEAT_VERSION?)
 # TODO: check for gcc and exit if it's not installed
 # TODO: check for virtualenv and exit if it's not installed
 # TODO: check for docker and check to be sure the user is in the docker group

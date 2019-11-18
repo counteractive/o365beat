@@ -4565,7 +4565,7 @@ required: True
 The IP address of the device that was used when the activity was logged. The IP address is displayed in either an IPv4 or IPv6 address format.
 
 
-type: ip
+type: keyword
 
 required: False
 
