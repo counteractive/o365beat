@@ -13,7 +13,7 @@ It closes a number of issues (#12, #13, and #14), but there is still a lot on th
 
 The easiest way to get started with o365beat is to use the pre-built binaries available in the [latest release](https://github.com/counteractive/o365beat/releases/latest/).
 
-These pre-built packages include configuration files which contain all the necessary credential information to connect to the audit logs for your tenancy.  The default configuration file ([`o365beat.yml`](./_meta/beat.yml)) pulls this information from your environment, like so:
+These pre-built packages include configuration files which contain all the necessary credential information to connect to the audit logs for your tenancy.  The default configuration file ([`o365beat.yml`](./_meta/beat.yml)) pulls this information from your environment or beats keystores (see [this issue](https://github.com/counteractive/o365beat/issues/11) or the [filebeat docs](https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html)), like so:
 
 ```yaml
 o365beat:
@@ -27,7 +27,7 @@ o365beat:
   client_secret: ${O365BEAT_CLIENT_SECRET:}
   client_id:     ${O365BEAT_CLIENT_ID:}     # aka application id (GUID)
   directory_id:  ${O365BEAT_DIRECTORY_ID:}  # aka tenant id (GUID)
-  registry_file_path: ${O365BEAT_REGISTRY_PATH:./o365beat-registry.json}
+  registry_file_path: ${O365BEAT_REGISTRY_PATH:./o365beat.state}
 
   # the following content types will be pulled from the API
   # for available types, see https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference#working-with-the-office-365-management-activity-api
@@ -37,6 +37,8 @@ o365beat:
     - Audit.SharePoint
     - Audit.General
 ```
+
+**NOTE: Due to a quirk in the libbeat build system, the default config file contains an additional `processors` section that gets merged into the o365beat.yml and shadows the custom processors used by this beat. You must manually remove the second `processors` section, or merge the two, to avoid problems.**  Please see [this issue](https://github.com/counteractive/o365beat/issues/9) for more information, we're working on a durable fix.
 
 See below for more details on these values.
 
@@ -85,8 +87,6 @@ input {
 ```
 
 ### Schema
-
-**NOTE: Due to a quirk in the libbeat build system, the default config file contains an additional `processors` section that gets merged into the o365beat.yml and shadows these custom ECS processors. If you don't see ECS fields, you must manually remove the second `processors` section, or merge the two.**  Please see [this issue](https://github.com/counteractive/o365beat/issues/9) for more information.
 
 As of v1.2.0, o365beat includes a [processor](https://github.com/elastic/beats/blob/master/libbeat/docs/processors-using.asciidoc#convert) to map the raw API-provided events to Elastic Common Schema ([ECS](https://www.elastic.co/guide/en/ecs/current/index.html)) fields.  This allows this beat to work with standard Kibana dashboards, including capabilities in [Elastic SIEM](https://www.elastic.co/products/siem).  Updates in v1.4.0 and v1.4.1 corrected some parsing issues and included at least one more ECS field.
 
