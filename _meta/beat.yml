@@ -56,6 +56,7 @@ processors:
         # easier to rehydrate into arrays from strings than vice versa:
         - {from: Parameters, type: string}                        # no ecs mapping
         - {from: ExtendedProperties, type: string}                # no ecs mapping
+        - {from: ModifiedProperties, type: string}                # no ecs mapping
       ignore_missing: true
       fail_on_error: false
       mode: copy # default
