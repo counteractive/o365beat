@@ -90,6 +90,7 @@ func (bt *O365beat) apiRequest(verb, urlStr string, body, query, headers map[str
 		return nil, err
 	}
 	reqQuery := req.URL.Query() // keep querystring values from urlStr
+	reqQuery.Set("PublisherIdentifier", bt.config.DirectoryID) // to prevent throttling
 	for k, v := range query {
 		reqQuery.Set(k, v)
 	}
@@ -156,8 +157,7 @@ func (bt *O365beat) authenticate() error {
 func (bt *O365beat) listSubscriptions() ([]map[string]string, error) {
 	logp.Info("getting content subscriptions")
 	logp.Debug("api", "getting content subscriptions from %v", bt.apiRootURL+"subscriptions/list")
-	query := map[string]string{"PublisherIdentifier": bt.config.DirectoryID}
-	res, err := bt.apiRequest("GET", bt.apiRootURL+"subscriptions/list", nil, query, nil)
+	res, err := bt.apiRequest("GET", bt.apiRootURL+"subscriptions/list", nil, nil, nil)
 	if err != nil {
 		logp.Error(err)
 		return nil, err
@@ -178,7 +178,6 @@ func (bt *O365beat) subscribe(contentType string) (common.MapStr, error) {
 	logp.Debug("api", "subscribing to %v at %s", contentType, bt.apiRootURL+"subscriptions/start")
 	query := map[string]string{
 		"contentType":         contentType,
-		"PublisherIdentifier": bt.config.DirectoryID,
 	}
 	res, err := bt.apiRequest("POST", bt.apiRootURL+"subscriptions/start", nil, query, nil)
 	if err != nil {
@@ -260,7 +259,6 @@ func (bt *O365beat) listAvailableContent(contentType string, start, end time.Tim
 		"contentType":         contentType,
 		"startTime":           start.UTC().Format(dateFmt),
 		"endTime":             end.UTC().Format(dateFmt),
-		"PublisherIdentifier": bt.config.DirectoryID,
 	}
 	res, err := bt.apiRequest("GET", bt.apiRootURL+"subscriptions/content", nil, query, nil)
 	if err != nil {
@@ -346,10 +344,7 @@ func (bt *O365beat) listAllAvailableContent(start, end time.Time) ([]map[string]
 // getContent gets actual content blobs
 func (bt *O365beat) getContent(urlStr string) ([]common.MapStr, error) {
 	logp.Debug("api", "getting content from %v.", urlStr)
-	query := map[string]string{
-		"PublisherIdentifier": bt.config.DirectoryID,
-	}
-	res, err := bt.apiRequest("GET", urlStr, nil, query, nil)
+	res, err := bt.apiRequest("GET", urlStr, nil, nil, nil)
 	if err != nil {
 		logp.Error(err)
 		return nil, err
