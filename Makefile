@@ -11,7 +11,7 @@ MAGE_IMPORT_PATH=${BEAT_PATH}/vendor/github.com/magefile/mage
 NO_COLLECT=true
 
 # for build purposes (doesn't fix version command in cmd/root.go):
-override BEAT_VERSION=1.4.2
+override BEAT_VERSION=1.4.3
 override BEAT_VENDOR=Counteractive
 
 # Path to the libbeat Makefile

@@ -2,12 +2,7 @@
 
 O365beat is an open source log shipper used to fetch Office 365 audit logs from the [Office 365 Management Activity API](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference) and forward them with all the flexibility and capability provided by the [beats platform](https://github.com/elastic/beats) (specifically, [libbeat](https://github.com/elastic/beats/tree/master/libbeat)).
 
-**The latest release is [v1.4.2](https://github.com/counteractive/o365beat/releases/latest)**.  It:
-
-1. Includes new kibana visualizations and a dashboard since v1.4.1, showing `AlertTriggered` events from Microsoft's Advanced Threat Protection service, a chart of common client IP addresses, a list of unique users, and a running stream of summarized activity.
-1. Updates processors to better handle certain log fields.  Specifically, the API provides `Parameters` and `ExtendedProperties` fields as arrays of objects with just `Name` and `Value` keys, which is _very_ confusing and difficult to work with, and causes issues with elasticsearch.  We found this was true of the `ModifiedProperties` field as well.  This version ships all those as strings, which can then be deserialized or parsed with string-based tools.  Most importantly, it stops indexing errors and dropped events.
-
-It closes a number of issues (#12, #13, and #14), but there is still a lot on the [to-do list](#tasks) and probably more than a few bugs still hiding out there! Please open an issue or submit a pull request if you notice any problems in testing or production.
+**The latest release is [v1.4.3](https://github.com/counteractive/o365beat/releases/latest)**.  It closes issues related to throttling (#17) and troubleshooting (#21).  Please open an issue or submit a pull request if you notice any problems in testing or production, and thanks to the users who have already done so, we appreciate the feedback!
 
 ## Getting Started with O365beat
 
@@ -214,7 +209,8 @@ This will fetch and create all images required for the build process. The whole 
 
 ## Changelog
 
-* v1.4.2 - Fixes multiple processor bugs (closes issues #12, #13, and #14)
+* v1.4.3 - Fixed bugs related to throttling and troubleshooting (closes issues #17 and #21)
+* v1.4.2 - Fixed multiple processor bugs (closes issues #12, #13, and #14)
 * v1.4.1 - Added kibana visualizations and dashboard and updated processors to better handle fields containing data arrays
 * v1.4.0 - Bumped libbeat to v7.4.0 and fixed throttling issue
 * v1.3.1 - Updated documentation and improved error messages
