@@ -41,7 +41,7 @@ See below for more details on these values.
 
 ### Prerequisites and Permissions
 
-O365beat requires that you [enable audit log search](https://docs.microsoft.com/en-us/microsoft-365/compliance/turn-audit-log-search-on-or-off#turn-on-audit-log-search) for your Office 365 tenancy, done through the Security and Compliance Center in the Office 365 Admin Portal.
+O365beat requires that you [**enable audit log search**](https://docs.microsoft.com/en-us/microsoft-365/compliance/turn-audit-log-search-on-or-off#turn-on-audit-log-search) for your Office 365 tenancy, done through the Security and Compliance Center in the Office 365 Admin Portal.  If you want detailed Exchange events, you also have to [**enable mailbox auditing**](https://docs.microsoft.com/en-us/microsoft-365/compliance/enable-mailbox-auditing) (on by default since January 2019, but worth checking).
 
 It also needs access to the Office 365 Management API: instructions for setting this up are available in the [Microsoft documentation](https://docs.microsoft.com/en-us/office/office-365-management-api/get-started-with-office-365-management-apis#register-your-application-in-azure-ad).
 
@@ -65,9 +65,9 @@ To run O365beat with all debugging output enabled, run:
 ./o365beat --path.config . -c o365beat.yml -e -d "*" # add --strict.perms=false under WSL 1
 ```
 
-State is maintained in the `registry_file_path` location, by default in the working directory as `o365beat-registry.json`.  This file currently contains only a timestamp representing the creation date of the last content blob retrieved, to prevent repeat downloads.
+State is maintained in the `registry_file_path` location, by default in the working directory as `o365beat.state`.  This file currently contains only a timestamp representing the creation date of the last content blob retrieved, to prevent repeat downloads.
 
-**NOTE:** By default o365beat doesn't know where to look for its configuration so you have to specify that explicitly.  If you see errors authenticating it may be the beat's not seeing your config.  Future versions will have more helpful error messages in this regard.
+**NOTE:** Unless it's installed, o365beat doesn't know where to look for its configuration so you have to specify that explicitly.  If you see errors authenticating it may be the beat's not seeing your config.  Future versions will have more helpful error messages in this regard.
 
 ### Receive with Logstash
 
@@ -116,11 +116,43 @@ processors:
         # easier to rehydrate into arrays from strings than vice versa:
         - {from: Parameters, type: string}                        # no ecs mapping
         - {from: ExtendedProperties, type: string}                # no ecs mapping
+        - {from: ModifiedProperties, type: string}                # no ecs mapping
 ```
 
 Please open an issue or a pull request if you have suggested improvements to this approach.
 
+## Frequently Asked Questions (FAQ)
+
+* **Why can't I see events from Exchange (or some other source)?**
+
+  1. Confirm all the content types are listed under the `content_types` key in `o365beat.yml`, like so:
+      ```yaml
+      content_types:
+        - Audit.AzureActiveDirectory
+        - Audit.Exchange
+        - Audit.SharePoint
+        - Audit.General
+        ```
+  2. Confirm [audit log search](https://docs.microsoft.com/en-us/microsoft-365/compliance/turn-audit-log-search-on-or-off#turn-on-audit-log-search) is enabled for your tenancy.
+  3. Many exchange events require mailbox auditing to be enabled.  Confirm [mailbox auditing is enabled](https://docs.microsoft.com/en-us/microsoft-365/compliance/enable-mailbox-auditing).
+  4. Some audit events take time to create.  If this is a test tenancy, or if you just enabled new audit subscriptions, it can take [up to 12 hours](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference#working-with-the-office-365-management-activity-api) for all the data to start showing up in the results.
+  5. Check the logs created by o365beat for any errors.  You can do this by running it at the command line with all debugging enabled: `./o365beat --path.config . -c o365beat.yml -e -d "*"`
+
+* **Why can't I see the ECS fields like `client.ip` in my events?**
+
+  Due to a quirk in the libbeat build system, the default config file contains an additional `processors` section that gets merged into the `o365beat.yml` and shadows the custom processors used by this beat. You must manually remove the second `processors` section (the one that contains `add_host_metadata` and `add_cloud_metadata`, neither of which is particularly useful), or merge the two, to avoid problems. Please see [this issue](https://github.com/counteractive/o365beat/issues/9) for more information, we're working on a durable fix.
+
+* **I'm seeing `non-200` errors in my debugging output for some API calls, am I getting all events?**
+
+  Please update to release [v1.4.3](https://github.com/counteractive/o365beat/releases/tag/v1.4.3) or later.  There were a few cases where the `PublisherIdentifier` was not appended to requests, which could cause API throttling in certain cases, which has now been fixed.
+
+* **I don't see my problem listed here, what gives?**
+
+  Please review this full README and the [issues list](https://github.com/counteractive/o365beat/issues), and submit a new issue if you can't find a solution.  And you can always [contact us](https://www.counteractive.net/contact/) for assistance. Thanks!
+
 *If you'd like to build yourself, read on.*
+
+## Build Process
 
 ### Build Requirements
 
