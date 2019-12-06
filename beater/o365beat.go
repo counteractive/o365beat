@@ -427,13 +427,15 @@ func (bt *O365beat) getRegistry() (time.Time, error) {
 	logp.Debug("beat", "getting registry info from %v", bt.config.RegistryFilePath)
 	reg, err := ioutil.ReadFile(bt.config.RegistryFilePath)
 	if err != nil {
-		logp.Warn("could not read registry file, may not exist. returning earliest possible time.")
+		logp.Warn("could not read registry file, may not exist (this is normal on first run). returning earliest possible time.")
 		return time.Time{}, nil
 	}
 	lastProcessed, err := time.Parse(time.RFC3339, string(reg))
 	if err != nil {
-		logp.Error(err)
-		return lastProcessed, err
+		// handle corrupted state file the same way we handle missing state file
+		// (alternative: error out and let user try to fix state file)
+		logp.Warn("error parsing timestamp in registry file (%v): %v; returning earliest possible time.", bt.config.RegistryFilePath, string(reg))
+		return time.Time{}, nil
 	}
 	return lastProcessed, nil
 }
