@@ -35,6 +35,15 @@ processors:
       when:
         contains:
           ClientIP: '['
+  - dissect:
+    field: ClientIP
+    tokenizer: '%{clientip}:%{clientport}'
+    when:
+      contains:
+        ClientIP: ':'
+      not:
+        contains:
+          ClientIP: '['
   - convert:
       fields:
         - {from: Id, to: 'event.id', type: string}                # ecs core
