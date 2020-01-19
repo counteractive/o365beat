@@ -1,6 +1,7 @@
 # TODO: update this ... if it's ever needed.
 o365beat:processors:
 - add_cloud_metadata: ~
+- add_docker_metadata: ~
 
 output.elasticsearch:
   hosts: '${ELASTICSEARCH_HOSTS:elasticsearch:9200}'

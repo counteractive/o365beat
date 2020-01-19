@@ -25,11 +25,11 @@ pre-setup: copy-vendor
 	$(MAKE) -f $(LIBBEAT_MAKEFILE) mage ES_BEATS=$(ES_BEATS)
 	$(MAKE) -f $(LIBBEAT_MAKEFILE) update BEAT_NAME=$(BEAT_NAME) ES_BEATS=$(ES_BEATS) NO_COLLECT=$(NO_COLLECT)
 
-# Copy beats (pinned to version 7.4.0) into vendor directory
+# Copy beats (pinned to version 7.5.1) into vendor directory
 .PHONY: copy-vendor
 copy-vendor:
 	mkdir -p vendor/github.com/elastic
-	git clone -b 'v7.4.0' --depth 1 https://github.com/elastic/beats.git vendor/github.com/elastic/beats
+	git clone -b 'v7.5.1' --depth 1 https://github.com/elastic/beats.git vendor/github.com/elastic/beats
 	rm -rf vendor/github.com/elastic/beats/.git vendor/github.com/elastic/beats/x-pack
 	# copy whatever version of mage beats is using into vendor directory
 	mkdir -p vendor/github.com/magefile

@@ -126,6 +126,7 @@ func Config() error {
 	//   processors:
 	//     - add_host_metadata: ~
 	//     - add_cloud_metadata: ~
+	//     - add_docker_metadata: ~ # since libbeat 7.5.1
 
 	configPath := filepath.Join(".", devtools.BeatName + ".yml")
 
@@ -146,6 +147,7 @@ func Config() error {
 				lines[i] = "# " + lines[i]
 				lines[i + 1] = "# " + lines[i + 1]
 				lines[i + 2] = "# " + lines[i + 2]
+				lines[i + 3] = "# " + lines[i + 3]
 				break
 			}
 		}
