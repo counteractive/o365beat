@@ -29,21 +29,43 @@ o365beat:
 #                      UserType, UserKey, Workload, ResultStatus, ObjectId,
 #                      UserId, ClientIP, Scope
 processors:
+  - dissect:
+      field: ClientIP
+      tokenizer: '[%{clientip}]:%{clientport}'
+      when:
+        contains:
+          ClientIP: '['
+  - dissect:
+    field: ClientIP
+    tokenizer: '%{clientip}:%{clientport}'
+    when:
+      contains:
+        ClientIP: ':'
+      not:
+        contains:
+          ClientIP: '['
   - convert:
       fields:
-        - {from: "Id", to: "event.id", type: string}                # ecs core
-        - {from: "RecordType", to: "event.code", type: string}      # ecs extended
-        # - {from: "CreationTime", to: "", type: ""}                # @timestamp
-        - {from: "Operation", to: "event.action", type: string}     # ecs core
-        - {from: "OrganizationId", to: "cloud.account.id", type: string} # ecs extended
-        # - {from: "UserType", to: "", type: ""}                    # no ecs mapping
-        # - {from: "UserKey", to: "", type: ""}                     # no ecs mapping
-        - {from: "Workload", to: "event.category", type: string}    # ecs core
-        - {from: "ResultStatus", to: "event.outcome", type: string} # ecs extended
-        # - {from: "ObjectId", to: "", type: ""}                    # no ecs mapping
-        - {from: "UserId", to: "user.id", type: string}             # ecs core
-        - {from: "ClientIP", to: "client.ip", type: ip}             # ecs core
-        # - {from: "Scope", to: "", type: ""}                       # no ecs mapping
+        - {from: Id, to: 'event.id', type: string}                # ecs core
+        - {from: RecordType, to: 'event.code', type: string}      # ecs extended
+        # - {from: "CreationTime", to: "", type: ""}              # @timestamp
+        - {from: Operation, to: 'event.action', type: string}     # ecs core
+        - {from: OrganizationId, to: 'cloud.account.id', type: string} # ecs extended
+        # - {from: UserType, to: '', type: ''}                    # no ecs mapping
+        # - {from: UserKey, to: '', type: ''}                     # no ecs mapping
+        - {from: Workload, to: 'event.category', type: string}    # ecs core
+        - {from: ResultStatus, to: 'event.outcome', type: string} # ecs extended
+        # - {from: ObjectId, to: '', type: ''}                    # no ecs mapping
+        - {from: UserId, to: 'user.id', type: string}             # ecs core
+        - {from: ClientIP, to: 'client.ip', type: ip}             # ecs core
+        - {from: 'dissect.clientip', to: 'client.ip', type: ip}   # ecs core
+        # - {from: "Scope", to: "", type: ""}                     # no ecs mapping
+        # the following fields use the challenging array-of-name-value-pairs format
+        # converting them to strings fixes issues in elastic, eases non-script parsing
+        # easier to rehydrate into arrays from strings than vice versa:
+        - {from: Parameters, type: string}                        # no ecs mapping
+        - {from: ExtendedProperties, type: string}                # no ecs mapping
+        - {from: ModifiedProperties, type: string}                # no ecs mapping
       ignore_missing: true
       fail_on_error: false
       mode: copy # default
