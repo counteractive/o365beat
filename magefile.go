@@ -22,6 +22,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/magefile/mage/mg"
@@ -112,5 +116,49 @@ func GoTestIntegration(ctx context.Context) error {
 
 // Config generates both the short/reference/docker configs.
 func Config() error {
-	return devtools.Config(devtools.AllConfigTypes, devtools.ConfigFileParams{}, ".")
+	err := devtools.Config(devtools.AllConfigTypes, devtools.ConfigFileParams{}, ".")
+	if err != nil {
+		return err
+	}
+
+	// comment out additional processors section in short config (fixes #9)
+	// targets known case of second section containing:
+	//   processors:
+	//     - add_host_metadata: ~
+	//     - add_cloud_metadata: ~
+
+	configPath := filepath.Join(".", devtools.BeatName + ".yml")
+
+	config, err := ioutil.ReadFile(configPath)
+	if err != nil {
+		return err
+	}
+
+	lines := strings.Split(string(config), "\n")
+
+	processorsCount := 0
+	for i, line := range lines {
+		matches, _ := regexp.MatchString("^processors:", line)
+		if matches {
+			processorsCount += 1
+			if processorsCount > 1 {
+				// TODO: make more generic to comment out all remaining processors sections
+				lines[i] = "# " + lines[i]
+				lines[i + 1] = "# " + lines[i + 1]
+				lines[i + 2] = "# " + lines[i + 2]
+				break
+			}
+		}
+	}
+
+	output := strings.Join(lines, "\n")
+	err = ioutil.WriteFile(configPath, []byte(output), 0600)
+	if err != nil {
+		return err
+	}
+
+	// reference config file doesn't have additional _un-commented_ processors sections
+	// TODO: equivalent fix for #9 in docker config (filepath.Join(targetDir, BeatName+".docker.yml"))
+
+	return err
 }
