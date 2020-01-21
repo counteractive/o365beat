@@ -17,7 +17,8 @@ o365beat:
   # period: 5m
 
   # pull secrets from environment (e.g, > set -a; . ./ENV_FILE; set +a;)
-  # or hard-coded here:
+  # or a key store (https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html)
+  # or hard-code here:
   tenant_domain: ${O365BEAT_TENANT_DOMAIN:}
   client_secret: ${O365BEAT_CLIENT_SECRET:}
   client_id:     ${O365BEAT_CLIENT_ID:}     # aka application id (GUID)
@@ -98,18 +99,13 @@ processors:
       fields:
         - {from: Id, to: 'event.id', type: string}                # ecs core
         - {from: RecordType, to: 'event.code', type: string}      # ecs extended
-        # - {from: "CreationTime", to: "", type: ""}              # @timestamp
         - {from: Operation, to: 'event.action', type: string}     # ecs core
         - {from: OrganizationId, to: 'cloud.account.id', type: string} # ecs extended
-        # - {from: UserType, to: '', type: ''}                    # no ecs mapping
-        # - {from: UserKey, to: '', type: ''}                     # no ecs mapping
         - {from: Workload, to: 'event.category', type: string}    # ecs core
         - {from: ResultStatus, to: 'event.outcome', type: string} # ecs extended
-        # - {from: ObjectId, to: '', type: ''}                    # no ecs mapping
         - {from: UserId, to: 'user.id', type: string}             # ecs core
         - {from: ClientIP, to: 'client.ip', type: ip}             # ecs core
         - {from: 'dissect.clientip', to: 'client.ip', type: ip}   # ecs core
-        # - {from: "Scope", to: "", type: ""}                     # no ecs mapping
         - {from: Severity, to: 'event.severity', type: string}    # ecs core
         # the following fields use the challenging array-of-name-value-pairs format
         # converting them to strings fixes issues in elastic, eases non-script parsing
@@ -145,6 +141,16 @@ Please open an issue or a pull request if you have suggested improvements to thi
 * **I'm seeing `non-200` errors in my debugging output for some API calls, am I getting all events?**
 
   Please update to release [v1.4.3](https://github.com/counteractive/o365beat/releases/tag/v1.4.3) or later.  There were a few cases where the `PublisherIdentifier` was not appended to requests, which could cause API throttling in certain cases, which has now been fixed.
+
+* **Can I use this beat with [GCC High endpoints](https://docs.microsoft.com/en-us/office365/enterprise/office-365-u-s-government-gcc-high-endpoints), or other non-standard Office 365 deployments?**
+
+  Yes! As of version 1.5.0, the beat pulls Login URL and Resource URL values from the config file.  The default values work for typical Office 365 situations, but you can connect to [GCC High endpoints](https://docs.microsoft.com/en-us/office365/enterprise/office-365-u-s-government-gcc-high-endpoints) by modifying the following keys:
+    ```yaml
+    o365beat:
+      login_url: login.microsoftonline.us  # default is https://login.microsoftonline.com/
+      resource_url: manage.office365.us    # default is https://manage.office.com/
+      # rest of your config ...
+    ```
 
 * **I don't see my problem listed here, what gives?**
 

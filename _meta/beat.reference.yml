@@ -3,20 +3,21 @@
 ############################# O365beat ######################################
 
 o365beat:
-  # period Defines how often API is polled for new content blobs
-  # 5 min default, as new content (probably) isn't published too often
+  ## period Defines how often API is polled for new content blobs
+  ## 5 min default, as new content (probably) isn't published too often
   # period: 5m
 
-  # pull secrets from environment (e.g, > set -a; . ./ENV_FILE; set +a;)
-  # or hard-coded here:
+  ## pull secrets from environment (e.g, > set -a; . ./ENV_FILE; set +a;)
+  ## or a key store (https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html)
+  ## or hard-code here:
   tenant_domain: ${O365BEAT_TENANT_DOMAIN:}
   client_secret: ${O365BEAT_CLIENT_SECRET:}
   client_id:     ${O365BEAT_CLIENT_ID:}     # aka application id (GUID)
   directory_id:  ${O365BEAT_DIRECTORY_ID:}  # aka tenant id (GUID)
   registry_file_path: ${O365BEAT_REGISTRY_PATH:./o365beat.state}
 
-  # the following content types will be pulled from the API
-  # for available types, see https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference#working-with-the-office-365-management-activity-api
+  ## the following content types will be pulled from the API
+  ## for available types, see https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference#working-with-the-office-365-management-activity-api
   content_types:
     - Audit.AzureActiveDirectory
     - Audit.Exchange
@@ -24,10 +25,22 @@ o365beat:
     - Audit.General
     # - DLP.All # TODO: figure out what to do with this, it's not like the rest
 
-# By default, map Office 365 Activities API event fields to ECS fields
-# API "Common" fields: Id, RecordType, CreationTime, Operation, OrganizationId,
-#                      UserType, UserKey, Workload, ResultStatus, ObjectId,
-#                      UserId, ClientIP, Scope
+  ## login_url defines the endpoint which the beat uses to authenticate to the API
+  ## this setting enables use of this beat with GCC High Office 365 plans and other custom situations
+  ## (https://docs.microsoft.com/en-us/office365/enterprise/office-365-u-s-government-gcc-high-endpoints)
+  ## **only change when using a non-standard deployment of Office 365**
+  # login_url: 'https://login.microsoftonline.com'
+
+  ## resource_url defines the root of the API endpoints themselves
+  ## this setting enables use of this beat with GCC High Office 365 plans and other custom situations
+  ## (https://docs.microsoft.com/en-us/office365/enterprise/office-365-u-s-government-gcc-high-endpoints)
+  ## **only change when using a non-standard deployment of Office 365**
+  # resource_url: 'https://manage.office.com'
+
+## By default, map Office 365 Activities API event fields to ECS fields
+## API "Common" fields: Id, RecordType, CreationTime, Operation, OrganizationId,
+##                      UserType, UserKey, Workload, ResultStatus, ObjectId,
+##                      UserId, ClientIP, Scope
 processors:
   - dissect:
       field: ClientIP
@@ -48,7 +61,6 @@ processors:
       fields:
         - {from: Id, to: 'event.id', type: string}                # ecs core
         - {from: RecordType, to: 'event.code', type: string}      # ecs extended
-        # - {from: "CreationTime", to: "", type: ""}              # @timestamp
         - {from: Operation, to: 'event.action', type: string}     # ecs core
         - {from: OrganizationId, to: 'cloud.account.id', type: string} # ecs extended
         # - {from: UserType, to: '', type: ''}                    # no ecs mapping
