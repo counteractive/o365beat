@@ -8,7 +8,7 @@ import (
 )
 
 var name = "o365beat"
-var version = "1.4.3" // TODO consider moving this or pulling from conf or env
+var version = "1.5.0" // TODO consider moving this or pulling from conf or env
 
 // RootCmd to handle beats cli
 var RootCmd = cmd.GenRootCmdWithSettings(beater.New, instance.Settings{Name: name, Version: version})
