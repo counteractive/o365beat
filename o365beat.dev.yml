@@ -29,11 +29,20 @@ o365beat:
 # TODO: Docs say event.created = time created in pipeline (not CreationTime)
 processors:
   - dissect:
-      field: "ClientIP"
-      tokenizer: "[%{clientip}]:%{clientport}"
+      field: ClientIP
+      tokenizer: '[%{clientip}]:%{clientport}'
       when:
         contains:
-          ClientIP: "["
+          ClientIP: '['
+  - dissect:
+      field: ClientIP
+      tokenizer: '%{clientip}:%{clientport}'
+      when:
+        contains:
+          ClientIP: ':'
+        not:
+          contains:
+            ClientIP: '['
   - convert:
       fields:
         - {from: Id, to: 'event.id', type: string}                # ecs core
@@ -50,7 +59,6 @@ processors:
         - {from: ClientIP, to: 'client.ip', type: ip}             # ecs core
         - {from: 'dissect.clientip', to: 'client.ip', type: ip}   # ecs core
         # - {from: "Scope", to: "", type: ""}                     # no ecs mapping
-        - {from: Severity, to: 'event.severity', type: string}    # ecs core
         # the following fields use the challenging array-of-name-value-pairs format
         # converting them to strings fixes issues in elastic, eases non-script parsing
         # easier to rehydrate into arrays from strings than vice versa:
@@ -64,14 +72,15 @@ processors:
 # output.console:
 #   pretty: true
 
-# output.file:
-#   path: "./tmp/"
-#   filename: o365beat.json
+output.file:
+  path: "./tmp/"
+  filename: o365beat.json
 
-output.elasticsearch:
-  hosts: ["http://localhost:9200"]
-  username: "elastic"
-  password: "changeme"
+# output.elasticsearch:
+#   hosts: ["http://localhost:9200"]
+#   username: "elastic"
+#   password: "changeme"
+
 # output.logstash:
 #   hosts:
 #     - ${O365BEAT_LOGSTASH_HOST}
