@@ -8,6 +8,10 @@
 o365beat:
   period: 30s
 
+  # used to test custom API endpoints functionality (GCC high)
+  # login_url: https://login.microsoftonline.com  # default is https://login.microsoftonline.com
+  # resource_url: https://manage.office.com       # default is https://manage.office.com
+
   # > set -a; . ./o365beat.env; set +a;
   tenant_domain: ${O365BEAT_TENANT_DOMAIN}
   client_secret: ${O365BEAT_CLIENT_SECRET}
@@ -47,18 +51,13 @@ processors:
       fields:
         - {from: Id, to: 'event.id', type: string}                # ecs core
         - {from: RecordType, to: 'event.code', type: string}      # ecs extended
-        # - {from: "CreationTime", to: "", type: ""}              # @timestamp
         - {from: Operation, to: 'event.action', type: string}     # ecs core
         - {from: OrganizationId, to: 'cloud.account.id', type: string} # ecs extended
-        # - {from: UserType, to: '', type: ''}                    # no ecs mapping
-        # - {from: UserKey, to: '', type: ''}                     # no ecs mapping
         - {from: Workload, to: 'event.category', type: string}    # ecs core
         - {from: ResultStatus, to: 'event.outcome', type: string} # ecs extended
-        # - {from: ObjectId, to: '', type: ''}                    # no ecs mapping
         - {from: UserId, to: 'user.id', type: string}             # ecs core
         - {from: ClientIP, to: 'client.ip', type: ip}             # ecs core
         - {from: 'dissect.clientip', to: 'client.ip', type: ip}   # ecs core
-        # - {from: "Scope", to: "", type: ""}                     # no ecs mapping
         # the following fields use the challenging array-of-name-value-pairs format
         # converting them to strings fixes issues in elastic, eases non-script parsing
         # easier to rehydrate into arrays from strings than vice versa:

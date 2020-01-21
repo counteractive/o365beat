@@ -60,9 +60,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 	}
 
 	// using url.Parse seems like overkill
-	//loginURL := "https://login.microsoftonline.com/" // TODO remove
 	loginURL := c.LoginURL
-	//resourceURL := "https://manage.office.com/" // TODO remove
 	resourceURL := c.ResourceURL
 	au := loginURL + "/" + c.TenantDomain + "/oauth2/token?api-version=1.0"
 	api := resourceURL + "/api/v1.0/" + c.DirectoryID + "/activity/feed/"
@@ -132,7 +130,6 @@ func (bt *O365beat) authenticate() error {
 	logp.Info("authenticating via %s", bt.authURL)
 	reqBody := url.Values{}
 	reqBody.Set("grant_type", "client_credentials")
-	//reqBody.Set("resource", "https://manage.office.com") // TODO remove
 	reqBody.Set("resource", bt.config.ResourceURL)
 	reqBody.Set("client_id", bt.config.ClientID)
 	reqBody.Set("client_secret", bt.config.ClientSecret)

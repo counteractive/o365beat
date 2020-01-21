@@ -147,8 +147,8 @@ Please open an issue or a pull request if you have suggested improvements to thi
   Yes! As of version 1.5.0, the beat pulls Login URL and Resource URL values from the config file.  The default values work for typical Office 365 situations, but you can connect to [GCC High endpoints](https://docs.microsoft.com/en-us/office365/enterprise/office-365-u-s-government-gcc-high-endpoints) by modifying the following keys:
     ```yaml
     o365beat:
-      login_url: login.microsoftonline.us  # default is https://login.microsoftonline.com/
-      resource_url: manage.office365.us    # default is https://manage.office.com/
+      login_url: login.microsoftonline.us  # default is login.microsoftonline.com
+      resource_url: manage.office365.us    # default is manage.office.com
       # rest of your config ...
     ```
 
