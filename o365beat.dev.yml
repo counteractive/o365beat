@@ -32,6 +32,34 @@ o365beat:
 #                      UserId, ClientIP, Scope
 # TODO: Docs say event.created = time created in pipeline (not CreationTime)
 processors:
+  - script:
+      when:
+        or:
+          - has_fields: ['Parameters']
+          - has_fields: ['ExtendedProperties']
+      lang: javascript
+      id: name_value_array_parser
+      source: >
+        function process(event){
+          var processed = event.Get('processed') || {};
+          var parameters = event.Get('Parameters')
+          if(!!parameters && !!parameters.length){
+            processed.Parameters = processed.Parameters || {};
+            for(var i = 0; i < parameters.length; i++){
+              var p = parameters[i];
+              if(p.Name) processed.Parameters[p.Name] = p.Value;
+            }
+          }
+          var extendedProperties = event.Get('ExtendedProperties')
+          if(!!extendedProperties && !!extendedProperties.length){
+            processed.ExtendedProperties = processed.ExtendedProperties || {};
+            for(var i = 0; i < extendedProperties.length; i++){
+              var p = extendedProperties[i];
+              if(p.Name) processed.ExtendedProperties[p.Name] = p.Value;
+            }
+          }
+          event.Put('processed', processed);
+        }
   - dissect:
       field: ClientIP
       tokenizer: '[%{clientip}]:%{clientport}'
