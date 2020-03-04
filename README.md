@@ -20,10 +20,6 @@ These pre-built packages include configuration files which contain all the neces
 
 ```yaml
 o365beat:
-  # period Defines how often API is polled for new content blobs
-  # 5 min default, as new content (probably) isn't published too often
-  # period: 5m
-
   # pull secrets from environment (e.g, > set -a; . ./ENV_FILE; set +a;)
   # or a key store (https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html)
   # or hard-code here:
@@ -160,6 +156,14 @@ Please open an issue or a pull request if you have suggested improvements to thi
       # rest of your config ...
     ```
 
+* **Why am I getting timeout errors when retrieving certain content types?**
+
+  For busy tenants or certain networking environments the default `api_timeout` of 30 seconds might be insufficient.  You can extend this in `o365beat.yml`.  Additionally, you can minimize risk of timeouts by reducing the `content_max_age` setting (default 7 days, or 168 hours) to something like 1 day (`1d`) or a few hours (say, `5h`).  Generally this will only impact you on the first time you run the beat, as every request thereafter will only be requesting data for the preceding `period` (default, 5 minutes).  See [this issue](https://github.com/counteractive/o365beat/issues/39) for additional discussion.
+
+* **Why are the authentication events (especially logon failures and errors) so confusing?**
+
+  Please see [this issue](https://github.com/counteractive/o365beat/issues/37) for an in-depth discussion of some of the idiosyncrasies of the audit log events themselves.  This beat just ships them, Microsoft makes decisions about what's in them.
+
 * **I don't see my problem listed here, what gives?**
 
   Please review this full README and the [issues list](https://github.com/counteractive/o365beat/issues), and submit a new issue if you can't find a solution.  And you can always [contact us](https://www.counteractive.net/contact/) for assistance. Thanks!
@@ -210,7 +214,7 @@ make update
 
 ### Cleanup
 
-To clean  O365beat source code, run the following command:
+To clean o365beat source code, run the following command:
 
 ```bash
 make fmt
@@ -224,7 +228,7 @@ make clean
 
 ### Clone
 
-To clone O365beat from the git repository, run the following commands:
+To clone o365beat from the git repository, run the following commands:
 
 ```bash
 mkdir -p ${GOPATH}/src/github.com/counteractive/o365beat
@@ -256,6 +260,7 @@ This will fetch and create all images required for the build process. The whole 
 
 ## Changelog
 
+* v1.5.1 - Added support for the `script` processor (to fix #41), updated README and config files to highlight options to help avoid timeouts (#39), updated README to link to references on API event data (#37)
 * v1.5.0 - Added and documented feature to customize API endpoints (#25), updates libbeat to v7.5.1, properly parses certain `ClientIP` field formats (#16, #31), fixes build issue that caused important processors to be shadowed in config (#9), fixes issue parsing corrupted state/registry files (#19).
 * v1.4.3 - Fixed bugs related to throttling and troubleshooting (closes issues #17 and #21)
 * v1.4.2 - Fixed multiple processor bugs (closes issues #12, #13, and #14)

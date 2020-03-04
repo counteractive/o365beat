@@ -7,6 +7,19 @@ o365beat:
   ## 5 min default, as new content (probably) isn't published too often
   # period: 5m
 
+  # period Defines how often API is polled for new content blobs
+  # 5 min default, as new content (probably) isn't published too often
+  # period: 5m
+
+  # api_timeout Defines how long the beat will wait for responses from the API
+  # 30 second default; extend this for busy tenants
+  # api_timeout: 30s
+
+  # content_max_age Defines the oldest content the beat will request
+  # 7 day default, which is the max retained according to Microsoft
+  # reduce this for busy tenants to minimize risk of timeouts
+  # content_max_age: 168h
+
   ## pull secrets from environment (e.g, > set -a; . ./ENV_FILE; set +a;)
   ## or a key store (https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html)
   ## or hard-code here:
