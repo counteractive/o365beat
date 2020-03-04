@@ -44,6 +44,12 @@ o365beat:
 ##                      UserId, ClientIP, Scope
 processors:
   - dissect:
+      field: UserId
+      tokenizer: '%{user.name}@%{user.domain}'
+      when:
+        contains:
+          UserId: '@'
+  - dissect:
       field: ClientIP
       tokenizer: '[%{clientip}]:%{clientport}'
       when:
