@@ -2,13 +2,11 @@
 
 O365beat is an open source log shipper used to fetch Office 365 audit logs from the [Office 365 Management Activity API](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference) and forward them with all the flexibility and capability provided by the [beats platform](https://github.com/elastic/beats) (specifically, [libbeat](https://github.com/elastic/beats/tree/master/libbeat)).
 
-**The latest release is [v1.5.0](https://github.com/counteractive/o365beat/releases/latest)**.  This is a significant release that:
+**The latest release is [v1.5.1](https://github.com/counteractive/o365beat/releases/latest)**.  This release:
 
-* Supports [GCC High endpoints](https://docs.microsoft.com/en-us/office365/enterprise/office-365-u-s-government-gcc-high-endpoints) or other non-standard Office 365 deployments
-* Updates underlying libbeat to v7.5.1
-* Adds a new processor to properly parse certain `ClientIP` field formats to ECS `client.ip`
-* Fixes a persistent issue in the build process that caused important custom `processors` to be "shadowed" by a second `processors` section.  This won't help those who keep their configs from previous installs (and who have already fixed them according to the instructions below), but it will help future users not to run into that problem.
-* Fixes an issue parsing corrupted state/registry files.
+* Added support for the [`script` processor](https://www.elastic.co/guide/en/beats/filebeat/current/processor-script.html) and provided a sample processor script to convert fields that contain arrays of name-value pairs into a "normal" object (closes #41)
+* Updated README and config files to highlight options to help avoid timeouts on busy tenancies (closes #39)
+* Updated README to link to references on API event data (closes #37)
 
 **Thank you so much to the users who reached out with issues, including feature requests.**  Please continue to help us and the community by opening issues or submitting pull requests if you notice problems in testing or production, or if there are features you'd like to see. We appreciate the feedback!
 
@@ -159,6 +157,10 @@ Please open an issue or a pull request if you have suggested improvements to thi
 * **Why am I getting timeout errors when retrieving certain content types?**
 
   For busy tenants or certain networking environments the default `api_timeout` of 30 seconds might be insufficient.  You can extend this in `o365beat.yml`.  Additionally, you can minimize risk of timeouts by reducing the `content_max_age` setting (default 7 days, or 168 hours) to something like 1 day (`1d`) or a few hours (say, `5h`).  Generally this will only impact you on the first time you run the beat, as every request thereafter will only be requesting data for the preceding `period` (default, 5 minutes).  See [this issue](https://github.com/counteractive/o365beat/issues/39) for additional discussion.
+
+* **Can I parse event fields like `ExtendedProperties` and `Parameters` that contain arrays of name-value pairs on the client side before shipping them?**
+
+  As of version 1.5.1, the beat imports the [`script` processor](https://www.elastic.co/guide/en/beats/filebeat/current/processor-script.html) and provides a sample processor script in `o365beat.reference.yml` to convert fields that contain arrays of name-value pairs into a "normal" object. See [this issue](https://github.com/counteractive/o365beat/issues/41) for more discussion.
 
 * **Why are the authentication events (especially logon failures and errors) so confusing?**
 
