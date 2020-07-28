@@ -1,0 +1,13 @@
+/* TEAM */
+Creator: Chris Hendricks
+Site: https://www.counteractive.net
+Twitter: @counteract_ive
+Location: San Antonio, Texas, USA
+
+/* THANKS */
+Elastic NV: https://www.elastic.co/
+
+Microsoft: https://www.microsoft.com/en-us/microsoft-365
+
+/* SITE */
+Software: golang
