@@ -10,6 +10,8 @@ type Config struct {
 	Period           time.Duration `config:"period"`
 	TenantDomain     string        `config:"tenant_domain"`
 	ClientSecret     string        `config:"client_secret"`
+	CertificatePath  string        `config:"certificate_path"`
+	CertificatePwd   string        `config:"certificate_pwd"` //password for extracting the private key from the certificate
 	ClientID         string        `config:"client_id"`    // aka application id
 	DirectoryID      string        `config:"directory_id"` // aka tenant id
 	ContentTypes     []string      `config:"content_types"`
@@ -18,6 +20,8 @@ type Config struct {
 	ContentMaxAge    time.Duration `config:"content_max_age"`
 	LoginURL         string        `config:"login_url"`
 	ResourceURL      string        `config:"resource_url"`
+
+
 }
 
 // DefaultConfig sets defaults for configuration options (tune as necessary)
@@ -28,4 +32,7 @@ var DefaultConfig = Config{
 	ContentMaxAge:    (7 * 24 * 60) * time.Minute,
 	LoginURL:         "https://login.microsoftonline.com",
 	ResourceURL:      "https://manage.office.com",
+	ClientSecret:     "",
+	CertificatePath:  "",
+	CertificatePwd:   "",
 }
