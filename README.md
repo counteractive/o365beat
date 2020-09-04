@@ -64,8 +64,9 @@ _________________
 
 #### 2.Authenticate via Certificates
 
-Alternative you can authenticate via certificates, which can be [genrated using openssl, as described here](https://github.com/Azure/go-autorest/tree/master/autorest/adal#register-an-azure-ad-application-with-certificate). Then, you need to upload the certificate(the .crt ), which can be done in the Certificates & secrets tab to the left of the application registration menu.
-![](https://i0.wp.com/laurakokkarinen.com/wp-content/uploads/2019/04/cer-uploaded.png?w=846&ssl=1) The [default config file](./o365beat.yml) expects these config values to be in your environment (i.e., as environment variables) or in a [keystore](https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html), named O365BEAT_CERTIFICATE_PATH and O365BEAT_CERTIFICATE_PWD in addition to common fields like O365BEAT_TENANT_DOMAIN. You can hard-code them in that file if you like, especially when testing, just be smart about the permissions. If you choose this method be sure to leave the O365BEAT_CLIENT_SECRET field empty.
+Alternative you can authenticate via certificates, which can be [genrated using openssl, as described here](https://github.com/Azure/go-autorest/tree/master/autorest/adal#register-an-azure-ad-application-with-certificate). Then, you need to upload the certificate(the .crt file), which can be done in the Certificates & secrets tab to the left of the application registration menu.
+![](https://i0.wp.com/laurakokkarinen.com/wp-content/uploads/2019/04/cer-uploaded.png?w=846&ssl=1) 
+The [default config file](./o365beat.yml) expects these config values to be in your environment (i.e., as environment variables) or in a [keystore](https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html), named O365BEAT_CERTIFICATE_PATH and O365BEAT_CERTIFICATE_PWD in addition to common fields like O365BEAT_TENANT_DOMAIN. You can hard-code them in that file if you like, especially when testing, just be smart about the permissions. If you choose this method be sure to leave the O365BEAT_CLIENT_SECRET field empty.
 
 _________________
 
