@@ -2,13 +2,9 @@
 
 O365beat is an open source log shipper used to fetch Office 365 audit logs from the [Office 365 Management Activity API](https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference) and forward them with all the flexibility and capability provided by the [beats platform](https://github.com/elastic/beats) (specifically, [libbeat](https://github.com/elastic/beats/tree/master/libbeat)).
 
-**The latest release is [v1.5.1](https://github.com/counteractive/o365beat/releases/latest)**.  This release:
+> **Note:** [Filebeat](https://www.elastic.co/beats/filebeat) officially supports o365 log collection using the [o365 module](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-o365.html) as of [version 7.7.0](https://www.elastic.co/guide/en/beats/libbeat/current/release-notes-7.7.0.html) ([source](https://github.com/elastic/beats/tree/156c87baabf4c9b20a984e2b2bfe857b92035466/x-pack/filebeat/module/o365)). For most users we expect the best choice is to move to that solution, to ensure the greatest compatibility with the overall Elastic Stack.
 
-* Added support for the [`script` processor](https://www.elastic.co/guide/en/beats/filebeat/current/processor-script.html) and provided a sample processor script to convert fields that contain arrays of name-value pairs into a "normal" object (closes #41)
-* Updated README and config files to highlight options to help avoid timeouts on busy tenancies (closes #39)
-* Updated README to link to references on API event data (closes #37)
-
-**Thank you so much to the users who reached out with issues, including feature requests.**  Please continue to help us and the community by opening issues or submitting pull requests if you notice problems in testing or production, or if there are features you'd like to see. We appreciate the feedback!
+**Thank you so much to the users, especially those who reached out with issues, including feature requests.**  We hope this tool added value - if there's anything we can do to help, please [contact us](https://www.counteractive.net/contact/).  We'll have one more release to encompass recent updates, but will not be adding features.  Please continue to help us and the community by opening issues or submitting pull requests if you notice problems in testing or production. We appreciate the feedback!
 
 ## Getting Started with o365beat
 
@@ -26,8 +22,8 @@ o365beat:
   client_id:     ${O365BEAT_CLIENT_ID:}     # aka application id (GUID)
   directory_id:  ${O365BEAT_DIRECTORY_ID:}  # aka tenant id (GUID)
   registry_file_path: ${O365BEAT_REGISTRY_PATH:./o365beat.state}
-  certificate_path: ${O365BEAT_CERTIFICATE_PATH:} #path to your .pfx file
-  certificate_pwd: ${O365BEAT_CERTIFICATE_PWD:} #password of your .pfx file
+  certificate_path:   ${O365BEAT_CERTIFICATE_PATH:} #path to your .pfx file
+  certificate_pwd:    ${O365BEAT_CERTIFICATE_PWD:} #password of your .pfx file
 
   # the following content types will be pulled from the API
   # for available types, see https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference#working-with-the-office-365-management-activity-api
@@ -38,9 +34,7 @@ o365beat:
     - Audit.General
 ```
 
-**NOTE 1: In pre-packaged releases before v1.5.0, the packaged config file contains an additional `processors` section that gets merged into the o365beat.yml and shadows the custom processors used by this beat. You must manually remove the second `processors` section, or merge the two, to avoid problems.**  This is due to a quirk in the libbeat build system which was fixed in release v1.5.0.
-
-Again, **v1.5.0 packages (and later) do not exhibit this issue,** but if you retain your old configuration files you may still have the problematic `processors` section.  Please see [this issue](https://github.com/counteractive/o365beat/issues/9) for more information on how to fix it.
+**NOTE 1:** In pre-packaged releases before v1.5.0, the packaged config file contains an additional `processors` section that gets merged into the o365beat.yml and shadows the custom processors used by this beat. You must manually remove the second `processors` section, or merge the two, to avoid problems.  This is due to a quirk in the libbeat build system which was fixed in release v1.5.0.  **v1.5.0 packages (and later) do not exhibit this issue,** but if you retain your old configuration files you may still have the problematic `processors` section.  Please see [this issue](https://github.com/counteractive/o365beat/issues/9) for more information on how to fix it.
 
 **NOTE 2:** If you decide to hard-code your configuration values, be sure to replace the `${:}` syntax, which [pulls from the environment](https://www.elastic.co/guide/en/beats/libbeat/current/config-file-format-env-vars.html).  For example, use `tenant_domain: acme.onmicrosoft.com` *not* `tenant_domain: ${acme.onmicrosoft.com:}`.
 
@@ -59,24 +53,22 @@ The next step is API authentication, which can be done in one of the two ways ou
 #### 1.Authenticate via Client Secret
 
 You can create client secrets by clicking the "Certificates & secrets" link on the left there.  Be sure to copy it somewhere or you’ll have to create a new one … there’s no facility for viewing them later.  The [default config file](./o365beat.yml) expects these config values to be in your environment (i.e., as environment variables) or in a [keystore](https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html), named O365BEAT_TENANT_DOMAIN, O365BEAT_CLIENT_SECRET, etc.  You can hard-code them in that file if you like, especially when testing, just be smart about the permissions. If you choose this method be sure to O365BEAT_CERTIFICATE_PATH and O365BEAT_CERTIFICATE_PWD fields empty.
-
 _________________
 
 #### 2.Authenticate via Certificates
 
-Alternative you can authenticate via certificates, which can be [genrated using openssl, as described here](https://github.com/Azure/go-autorest/tree/master/autorest/adal#register-an-azure-ad-application-with-certificate). Then, you need to upload the certificate(the .crt file), which can be done in the Certificates & secrets tab to the left of the application registration menu.
+Alternativly you can authenticate via certificates, which can be [generated using openssl, as described here](https://github.com/Azure/go-autorest/tree/master/autorest/adal#register-an-azure-ad-application-with-certificate). Then, you need to upload the certificate (the .crt file), which can be done in the Certificates & secrets tab to the left of the application registration menu.
+
 ![](https://i0.wp.com/laurakokkarinen.com/wp-content/uploads/2019/04/cer-uploaded.png?w=846&ssl=1) 
- <br /> The [default config file](./o365beat.yml) expects these config values to be in your environment (i.e., as environment variables) or in a [keystore](https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html), named O365BEAT_CERTIFICATE_PATH and O365BEAT_CERTIFICATE_PWD in addition to common fields like O365BEAT_TENANT_DOMAIN. You can hard-code them in that file if you like, especially when testing, just be smart about the permissions. If you choose this method be sure to leave the O365BEAT_CLIENT_SECRET field empty.
 
+The [default config file](./o365beat.yml) expects these config values to be in your environment (i.e., as environment variables) or in a [keystore](https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html), named O365BEAT_CERTIFICATE_PATH and O365BEAT_CERTIFICATE_PWD in addition to common fields like O365BEAT_TENANT_DOMAIN. You can hard-code them in that file if you like, especially when testing, just be smart about the permissions. If you choose this method be sure to leave the O365BEAT_CLIENT_SECRET field empty.
 _________________
-
 
 Finally, the Azure app registration permissions should look like this:
 
 ![App Permissions in Azure Portal](./docs/app-registration-permissions.jpg)
 
 You can edit those using that “API permissions” link on the left, with [more detailed instructions available from Microsoft](https://docs.microsoft.com/en-us/office/office-365-management-api/get-started-with-office-365-management-apis#specify-the-permissions-your-app-requires-to-access-the-office-365-management-apis).  The beat should automatically subscribe you to the right feeds, though that functionality is currently undergoing testing.
-
 
 ### Run
 
