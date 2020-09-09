@@ -26,6 +26,8 @@ o365beat:
   client_id:     ${O365BEAT_CLIENT_ID:}     # aka application id (GUID)
   directory_id:  ${O365BEAT_DIRECTORY_ID:}  # aka tenant id (GUID)
   registry_file_path: ${O365BEAT_REGISTRY_PATH:./o365beat.state}
+  certificate_path: ${O365BEAT_CERTIFICATE_PATH:} #path to your .pfx file
+  certificate_pwd: ${O365BEAT_CERTIFICATE_PWD:} #password of your .pfx file
 
   # the following content types will be pulled from the API
   # for available types, see https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference#working-with-the-office-365-management-activity-api
@@ -48,17 +50,33 @@ O365beat requires that you [**enable audit log search**](https://docs.microsoft.
 
 It also needs access to the Office 365 Management API: instructions for setting this up are available in the [Microsoft documentation](https://docs.microsoft.com/en-us/office/office-365-management-api/get-started-with-office-365-management-apis#register-your-application-in-azure-ad).
 
-Once you have these set up, you'll be able to get the information needed in the config file.  The naming conventions for the settings are a bit odd, in `o365beat.yml` you’ll see some of the synonyms: client id is also called the application id, and the directory id is also called the tenant id.  In the Azure portal, go to "App registrations" and you’ll see the Application (Client) ID – a GUID – right there in the application list.  If you click on that you’ll see the application (client) id and the directory (tenant) id in the top area.
+Once you have these set up, you'll be able to get the information needed in the config file. The naming conventions for the settings are a bit odd, in `o365beat.yml` you’ll see some of the synonyms: client id is also called the application id, and the directory id is also called the tenant id.  In the Azure portal, go to "App registrations" and you’ll see the Application (Client) ID – a GUID – right there in the application list.  If you click on that you’ll see the application (client) id and the directory (tenant) id in the top area.
 
 ![App Details in Azure Portal](./docs/app-registration-overview.jpg)
 
-The client secret is a little trickier, you can create them by clicking the "Certificates & secrets" link on the left there.  Be sure to copy it somewhere or you’ll have to create a new one … there’s no facility for viewing them later.  The [default config file](./o365beat.yml) expects these config values to be in your environment (i.e., as environment variables) or in a [keystore](https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html), named O365BEAT_TENANT_DOMAIN, O365BEAT_CLIENT_SECRET, etc.  You can hard-code them in that file if you like, especially when testing, just be smart about the permissions.
+The next step is API authentication, which can be done in one of the two ways outlined below.
+
+#### 1.Authenticate via Client Secret
+
+You can create client secrets by clicking the "Certificates & secrets" link on the left there.  Be sure to copy it somewhere or you’ll have to create a new one … there’s no facility for viewing them later.  The [default config file](./o365beat.yml) expects these config values to be in your environment (i.e., as environment variables) or in a [keystore](https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html), named O365BEAT_TENANT_DOMAIN, O365BEAT_CLIENT_SECRET, etc.  You can hard-code them in that file if you like, especially when testing, just be smart about the permissions. If you choose this method be sure to O365BEAT_CERTIFICATE_PATH and O365BEAT_CERTIFICATE_PWD fields empty.
+
+_________________
+
+#### 2.Authenticate via Certificates
+
+Alternative you can authenticate via certificates, which can be [genrated using openssl, as described here](https://github.com/Azure/go-autorest/tree/master/autorest/adal#register-an-azure-ad-application-with-certificate). Then, you need to upload the certificate(the .crt file), which can be done in the Certificates & secrets tab to the left of the application registration menu.
+![](https://i0.wp.com/laurakokkarinen.com/wp-content/uploads/2019/04/cer-uploaded.png?w=846&ssl=1) 
+ <br /> The [default config file](./o365beat.yml) expects these config values to be in your environment (i.e., as environment variables) or in a [keystore](https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html), named O365BEAT_CERTIFICATE_PATH and O365BEAT_CERTIFICATE_PWD in addition to common fields like O365BEAT_TENANT_DOMAIN. You can hard-code them in that file if you like, especially when testing, just be smart about the permissions. If you choose this method be sure to leave the O365BEAT_CLIENT_SECRET field empty.
+
+_________________
+
 
 Finally, the Azure app registration permissions should look like this:
 
 ![App Permissions in Azure Portal](./docs/app-registration-permissions.jpg)
 
 You can edit those using that “API permissions” link on the left, with [more detailed instructions available from Microsoft](https://docs.microsoft.com/en-us/office/office-365-management-api/get-started-with-office-365-management-apis#specify-the-permissions-your-app-requires-to-access-the-office-365-management-apis).  The beat should automatically subscribe you to the right feeds, though that functionality is currently undergoing testing.
+
 
 ### Run
 

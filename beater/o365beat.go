@@ -1,19 +1,24 @@
 package beater
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"github.com/Azure/go-autorest/autorest/adal"
+	"github.com/elastic/beats/libbeat/beat"
+	"github.com/elastic/beats/libbeat/common"
+	"github.com/elastic/beats/libbeat/logp"
+	"golang.org/x/crypto/pkcs12"
+	"gopkg.in/oleiade/reflections.v1"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/elastic/beats/libbeat/beat"
-	"github.com/elastic/beats/libbeat/common"
-	"github.com/elastic/beats/libbeat/logp"
 
 	// import o365beat-level processors (same style as filebeat)
 	_ "github.com/elastic/beats/libbeat/processors/script"
@@ -31,6 +36,22 @@ type authInfo struct {
 	Resource    string `json:"resource"`
 	AccessToken string `json:"access_token"`
 }
+
+
+func decodePkcs12(pkcs []byte, password string) (*x509.Certificate, *rsa.PrivateKey, error) {
+	privateKey, certificate, err := pkcs12.Decode(pkcs, password)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	rsaPrivateKey, isRsaKey := privateKey.(*rsa.PrivateKey)
+	if !isRsaKey {
+		return nil, nil, fmt.Errorf("PKCS#12 certificate must contain an RSA private key")
+	}
+
+	return certificate, rsaPrivateKey, nil
+}
+
 
 func (a *authInfo) header() string {
 	return fmt.Sprintf("%s %s", a.TokenType, a.AccessToken)
@@ -127,34 +148,109 @@ func (bt *O365beat) apiRequest(verb, urlStr string, body, query, headers map[str
 	return res, nil
 }
 
+func (bt *O365beat) callback(token adal.Token) error {
+	// body
+	return nil;
+}
+
 // authenticate retrieves oauth2 information using client id and client_secret for use with the API
 // https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow
 func (bt *O365beat) authenticate() error {
-	logp.Info("authenticating via %s", bt.authURL)
-	reqBody := url.Values{}
-	reqBody.Set("grant_type", "client_credentials")
-	reqBody.Set("resource", bt.config.ResourceURL)
-	reqBody.Set("client_id", bt.config.ClientID)
-	reqBody.Set("client_secret", bt.config.ClientSecret)
-	req, err := http.NewRequest("POST", bt.authURL, strings.NewReader(reqBody.Encode()))
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	logp.Debug("auth", "sending auth req: %v", req)
-	res, err := bt.httpClient.Do(req)
-	if err != nil {
-		logp.Error(err)
-		return err
-	} else if res.StatusCode != 200 {
-		// TODO: handle errors reading response body:
-		body, _ := ioutil.ReadAll(res.Body)
-		err = fmt.Errorf("non-200 status during auth.\n\tcheck client secret and other config details.\n\treq: %v\n\tres: %v\n\t%v", req, res, string(body))
-		logp.Error(err)
-		return err
+	if bt.config.ClientSecret == "" && bt.config.CertificatePath !="" && bt.config.CertificatePwd !="" {
+		const activeDirectoryEndpoint = "https://login.microsoftonline.com/"
+		//tenantID := "b0f86485-3e24-4eef-b1c3-337085cc000f"
+		tenantID := bt.config.DirectoryID
+		oauthConfigPointer, err := adal.NewOAuthConfig(activeDirectoryEndpoint, tenantID)
+		oauthConfig:=*oauthConfigPointer
+		applicationID := bt.config.ClientID
+		// The resource for which the token is acquired
+		resource := bt.config.ResourceURL
+		certificatePath := bt.config.CertificatePath
+		certData, err := ioutil.ReadFile(certificatePath)
+		if err != nil {
+			return fmt.Errorf("failed to read the certificate file (%s): %v", certificatePath, err)
+		}
+		// Get the certificate and private key from pfx file
+		certificate, rsaPrivateKey, err :=  decodePkcs12(certData, bt.config.CertificatePwd)
+		if err != nil {
+			return fmt.Errorf("failed to decode pkcs12 certificate while creating spt: %v", err)
+		}
+		//Set up the configuration of the service principal
+		spt, err := adal.NewServicePrincipalTokenFromCertificate(
+			oauthConfig,
+			applicationID,
+			certificate,
+			rsaPrivateKey,
+			resource,
+			bt.callback,
+		)
+		// acquires the token
+		err  = spt.Refresh()
+		var token adal.Token
+		if err == nil {
+			token = spt.Token()
+			logp.Info("token successfully acquired")
+		} else {
+			logp.Error(err)
+		}
+		var tokenValues [6]string
+		fieldsToExtract := []string{"AccessToken", "ExpiresIn", "ExpiresOn", "NotBefore", "Resource", "Type"}
+		//fieldsToExtract := []string{ "Type", "ExpiresIn", "NotBefore", "ExpiresOn",  "Resource", "AccessToken"}
+		for index, fieldName := range fieldsToExtract {
+			value, err := reflections.GetField(token, fieldName)
+			if err != nil {
+				logp.Error(err)
+			}
+			tokenValues[index]=fmt.Sprint(value)
+		}
+		//for debugging
+		//for _, str := range tokenValues {
+		//	fmt.Printf("* %s\n", str)
+		//}
+		var ai authInfo
+		aip := &ai
+		aip.AccessToken=tokenValues[0]
+		aip.ExpiresIn=tokenValues[1]
+		aip.ExpiresOn=tokenValues[2]
+		aip.NotBefore=tokenValues[3]
+		aip.Resource=tokenValues[4]
+		aip.TokenType=tokenValues[5]
+		//fields := reflect.TypeOf(ai)
+		//values := reflect.ValueOf(ai)
+		//for i := 0; i < fields.NumField(); i++ {
+		//	values.Field(i).SetString(tokenValues[i])
+		//}
+		//aip := &ai
+		bt.auth=aip
+	} else if bt.config.ClientSecret != "" && bt.config.CertificatePath =="" && bt.config.CertificatePwd ==""{
+		logp.Info("authenticating via %s", bt.authURL)
+		reqBody := url.Values{}
+		reqBody.Set("grant_type", "client_credentials")
+		reqBody.Set("resource", bt.config.ResourceURL)
+		reqBody.Set("client_id", bt.config.ClientID)
+		reqBody.Set("client_secret", bt.config.ClientSecret)
+		req, err := http.NewRequest("POST", bt.authURL, strings.NewReader(reqBody.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		logp.Debug("auth", "sending auth req: %v", req)
+		res, err := bt.httpClient.Do(req)
+		if err != nil {
+			logp.Error(err)
+			return err
+		} else if res.StatusCode != 200 {
+			// TODO: handle errors reading response body:
+			body, _ := ioutil.ReadAll(res.Body)
+			err = fmt.Errorf("non-200 status during auth.\n\tcheck client secret and other config details.\n\treq: %v\n\tres: %v\n\t%v", req, res, string(body))
+			logp.Error(err)
+			return err
+		}
+		defer res.Body.Close()
+		var ai authInfo
+		json.NewDecoder(res.Body).Decode(&ai)
+		logp.Debug("auth", "got auth info: %v", ai)
+		bt.auth = &ai
+	} else {
+		log.Fatal("fatal error: please enter your authentication credentials using either a client secret or a certificate")
 	}
-	defer res.Body.Close()
-	var ai authInfo
-	json.NewDecoder(res.Body).Decode(&ai)
-	logp.Debug("auth", "got auth info: %v", ai)
-	bt.auth = &ai
 	return nil
 }
 

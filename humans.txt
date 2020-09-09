@@ -4,7 +4,7 @@ Site: https://www.counteractive.net
 Twitter: @counteract_ive
 Location: San Antonio, Texas, USA
 
-Contributor: Mahoto Sasaki
+Contributor: Mahoto Sasaki, Yanpeng Yuan
 
 /* THANKS */
 Elastic NV: https://www.elastic.co/
