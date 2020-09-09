@@ -23,13 +23,13 @@ o365beat:
   ## pull secrets from environment (e.g, > set -a; . ./ENV_FILE; set +a;)
   ## or a key store (https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html)
   ## or hard-code here:
-#  tenant_domain: ${O365BEAT_TENANT_DOMAIN:}
-#  client_secret: ${O365BEAT_CLIENT_SECRET:}
-#  client_id:     ${O365BEAT_CLIENT_ID:}     # aka application id (GUID)
-#  directory_id:  ${O365BEAT_DIRECTORY_ID:}  # aka tenant id (GUID)
-#  registry_file_path: ${O365BEAT_REGISTRY_PATH:./o365beat.state}
-#  certificate_path: ${O365BEAT_CERTIFICATE_PATH:} #path to your .pfx file
-#  certificate_pwd: ${O365BEAT_CERTIFICATE_PWD:} #password of your .pfx file
+  tenant_domain: ${O365BEAT_TENANT_DOMAIN:}
+  client_secret: ${O365BEAT_CLIENT_SECRET:}
+  client_id:     ${O365BEAT_CLIENT_ID:}     # aka application id (GUID)
+  directory_id:  ${O365BEAT_DIRECTORY_ID:}  # aka tenant id (GUID)
+  registry_file_path: ${O365BEAT_REGISTRY_PATH:./o365beat.state}
+  certificate_path:   ${O365BEAT_CERTIFICATE_PATH:} #path to your .pfx file
+  certificate_pwd:    ${O365BEAT_CERTIFICATE_PWD:} #password of your .pfx file
 
   ## the following content types will be pulled from the API
   ## for available types, see https://docs.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-reference#working-with-the-office-365-management-activity-api
