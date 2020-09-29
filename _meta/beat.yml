@@ -71,7 +71,7 @@ processors:
         - {from: Id, to: 'event.id', type: string}                # ecs core
         - {from: RecordType, to: 'event.code', type: string}      # ecs extended
         - {from: Operation, to: 'event.action', type: string}     # ecs core
-        - {from: OrganizationId, to: 'cloud.account.id', type: string} # ecs extended
+        - {from: OrganizationId, to: 'organization.id', type: string} # ecs extended
         # - {from: UserType, to: '', type: ''}                    # no ecs mapping
         # - {from: UserKey, to: '', type: ''}                     # no ecs mapping
         - {from: Workload, to: 'event.category', type: string}    # ecs core
